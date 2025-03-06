@@ -96,7 +96,11 @@ function initPlotlyMap() {
     document.getElementById("plotly-map").on("plotly_click", function(data) {
         let clickedPoint = data.points[0].location;
         console.log("Clicked point:", clickedPoint);
-        if (currentViewLevel === "national") {
+
+        let isStateClick = states.features.find(d => d.properties.STATEFP === clickedPoint);
+
+        if (isStateClick) {
+            console.log(`Clicked on state: ${clickedPoint}`);
             stateClicked(clickedPoint);
         } else if (currentViewLevel === "state") {
             districtClicked(clickedPoint);
@@ -129,6 +133,20 @@ function stateClicked(stateID) {
     let center = getGeoCenter(stateFeature.geometry);
     console.log("Center coordinates:", center);
 
+    // Clear all district traces
+    let numTraces = document.getElementById("plotly-map").data.length;
+    if (numTraces > 1) {
+        for (let i = numTraces - 1; i >= 1; i--) {
+            Plotly.deleteTraces("plotly-map", i);
+        }
+    }
+
+    Plotly.relayout("plotly-map", {
+        "geo.center.lon": center[0],
+        "geo.center.lat": center[1],
+        "geo.projection.scale": 5,
+    });
+
     Plotly.restyle("plotly-map", { visible: false }, [1]);
 
     let districtTrace = {
@@ -148,13 +166,6 @@ function stateClicked(stateID) {
         text: stateDistricts.map(d => `${d.properties.LISTING_NAME} (${d.properties.PARTY}) - District ${d.properties.DISTRICT}`),
         visible: true
     };
-
-    Plotly.relayout("plotly-map", {
-        "geo.center.lon": center[0],
-        "geo.center.lat": center[1],
-        "geo.projection.scale": 5.5,
-        "geo.scope": "usa"
-    });
 
     Plotly.addTraces("plotly-map", districtTrace);
     /*Plotly.restyle("plotly-map", { visible: [false, true] }, [1]);*/
@@ -187,7 +198,7 @@ function districtClicked(districtID) {
     Plotly.relayout("plotly-map", {
         "geo.center.lon": center[0],
         "geo.center.lat": center[1],
-        "geo.projection.scale": 10 
+        "geo.projection.scale": 10
     });
 
     currentViewLevel = "district";
@@ -199,7 +210,7 @@ function districtClicked(districtID) {
     if (document.querySelector(`[onclick="loadTab('general')"].active`)) {
         updateMemberProfile(lastSelectedState, districtNum);
     }
-    if (document.querySelector(`[onclick="loadTab('network')"].active`)) {
+    if (document.querySelector(`[onclick="loadTab('radar-chart')"].active`)) {
         updateRadarChart(window.selectedMemberID);
     }
 }
@@ -209,7 +220,7 @@ function resetView() {
     Plotly.relayout("plotly-map", {
         "geo.center.lon": -95.7129,
         "geo.center.lat": 37.0902,
-        "geo.projection.scale": 1.0
+        "geo.projection.scale": 0.9
     });
 
     // Clear all district traces
@@ -246,7 +257,7 @@ function backToStateView() {
     Plotly.relayout("plotly-map", {
         "geo.center.lon": center[0],
         "geo.center.lat": center[1],
-        "geo.projection.scale": 5
+        "geo.projection.scale": 5.5
     });
 
     // Restore state trace visibility
@@ -263,9 +274,18 @@ function backToStateView() {
 
 // Function to calculate geometric center of a feature
 function getGeoCenter(geometry) {
-    let coords = geometry.coordinates[0];
-    let avgLon = coords.reduce((sum, c) => sum + c[0], 0) / coords.length;
-    let avgLat = coords.reduce((sum, c) => sum + c[1], 0) / coords.length;
+    if (!geometry || !geometry.coordinates) {
+        console.error("Invalid geometry:", geometry);
+        return [0, 0];  // Default to center of the map
+    }
+
+    let allCoords = geometry.type === "MultiPolygon"
+        ? geometry.coordinates.flat(2)  // Flatten multi-polygons
+        : geometry.coordinates[0]; // Single polygon
+
+    let avgLon = allCoords.reduce((sum, c) => sum + c[0], 0) / allCoords.length;
+    let avgLat = allCoords.reduce((sum, c) => sum + c[1], 0) / allCoords.length;
+
     return [avgLon, avgLat];
 }
 

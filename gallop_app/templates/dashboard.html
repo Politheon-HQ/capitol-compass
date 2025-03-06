@@ -36,12 +36,6 @@
             </div>
         </div>
 
-        <!-- Buttons for Navigation -->
-        <div class="button-container">
-            <button id="backToNationalView" onclick="resetView()" style="display: none;"><- Back to National View</button>
-            <button id="backToStateView" onclick="backToStateView()" style="display: none;"><- Back to State View</button>
-        </div>
-
         <!-- Tabs for Sidebar Navigation -->
         <div class="tabs">
             <button data-tab="general" onclick="loadTab('general')" class="active">General</button>
@@ -53,6 +47,10 @@
         <div class="main-container">
             <!-- Map Container -->
             <div id="map-container">
+                <div id="map-buttons">
+                    <button id="backToNationalView" class="back-button" onclick="resetView()" style="display: none;"><- Back to National View</button>
+                    <button id="backToStateView" class="back-button" onclick="backToStateView()" style="display: none;"><- Back to State View</button>
+                </div>
                 <div id="plotly-map"></div>
             </div>
 
