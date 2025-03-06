@@ -25,6 +25,21 @@ function loadTab(tabName) {
     } else if (tabName === "radar-chart") {
         // Load radar chart if switching to the Radar Chart tab
         console.log("Loading radar chart...");
+
+        if (!window.congressMembersData || window.congressMembersData.length > 0) {
+            initRadarDropdown(window.congressMembersData);
+        } else {
+            console.warn("Congress members data not loaded. Fetching data...");
+        }
+
+        document.getElementById("radar-member-select").addEventListener("change", function() {
+            let selectedMember = this.value;
+            if (!selectedMember) return;
+
+            console.log("Selected member:", selectedMember);
+            updateRadarChart(selectedMember);
+        });
+
         if (window.selectedMemberID) {
             updateRadarChart(window.selectedMemberID);
         } else {
@@ -34,7 +49,7 @@ function loadTab(tabName) {
         // Load ideology chart if switching to the Ideology tab
         console.log("Loading ideology chart...");
 
-        if (!window.loadIdeologyData.length) {
+        if (!window.loadIdeologyData || !window.ideologyData.length === 0) {
             console.warn("Ideology data not loaded. Fetching data...");
             return;
         }
@@ -47,6 +62,12 @@ function loadTab(tabName) {
 
     // Update active tab styling
     document.querySelectorAll(".tabs button").forEach(btn => btn.classList.remove("active"));
-    document.querySelector(`[onclick="loadTab('${tabName}')"]`).classList.add("active");
+
+    let activeTab = document.querySelector(`.tabs button[data-tab="${tabName}"]`);
+    if (activeTab) {
+        activeTab.classList.add("active");
+    } else {
+        console.warn(`Tab not found: ${tabName}`);
+    }
 }
 

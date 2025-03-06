@@ -44,10 +44,9 @@
 
         <!-- Tabs for Sidebar Navigation -->
         <div class="tabs">
-            <button onclick="loadTab('general')" class="active">General</button>
-            <button onclick="loadTab('members')">Members</button>
-            <button onclick="loadTab('radar-chart')">Radar Chart</button>
-            <button onclick="loadTab('ideology-chart')">Ideology Chart</button>
+            <button data-tab="general" onclick="loadTab('general')" class="active">General</button>
+            <button data-tab="radar-chart" onclick="loadTab('radar-chart')">Radar Chart</button>
+            <button data-tab="ideology-chart" onclick="loadTab('ideology-chart')">Ideology Chart</button>
         </div>
 
         <!-- Main Layout -->
@@ -72,7 +71,16 @@
                 <!-- Radar Chart Container -->
                 <div id="radar-chart-container" class="tab-container" style="display: none;">
                     <h2 id="radar-chart-title">Congress Members Radar Chart</h2>
+
+                    <!-- Radar Chart Controls -->
                     <div id="controls">
+                        <!-- Member Selection Dropdown -->
+                         <label for="radar-member-select">Select a Member:</label>
+                         <select id="radar-member-select">
+                            <option value="">-- Select a Member --</option>
+                         </select>
+
+                        <!-- Toggle for Self Proportion vs Across All Proportion -->
                         <div class="toggle-controls">
                             <label>
                                 <input type="radio" name="proportion-toggle" value="self" checked>
@@ -84,6 +92,8 @@
                             </label>
                         </div>
                     </div>
+
+                    <!-- Radar Chart -->
                     <div id="radar-chart"></div>
                 </div>
 

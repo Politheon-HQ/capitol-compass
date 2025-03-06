@@ -53,6 +53,12 @@ function loadIdeologyChart() {
         let selectedTopic = this.value;
         console.log("Selected topic:", this.value);
 
+        if (!selectedTopic) {
+            // Clear chart if no topic selected
+            document.getElementById("ideology-chart").innerHTML = "";
+            return;
+        }
+
         let filteredData = getDataForTopic(window.ideologyData, selectedTopic);
         if (filteredData.length === 0) {
             updateIdeologyChart([], "No data found for selected topic.");
@@ -61,8 +67,8 @@ function loadIdeologyChart() {
         }
     });
 
-    // Default to empty chart
-    updateIdeologyChart([], "Select a Topic to Display Data.");
+    // Prevent displaying "No data" message on initial load
+    updateIdeologyChart([], "Select a Topic to Display Data", true);
 }
 
 function populateTopicDropdown(topics) {
@@ -104,11 +110,17 @@ function getDataForTopic(data, topic) {
 }
 
 // Function to update ideology chart
-function updateIdeologyChart(data, title = "Ideology Distribution by State") {
+function updateIdeologyChart(data, title = "Ideology Distribution by State", isInitialLoad = false) {
     let chartDiv = document.getElementById("ideology-chart");
 
     if (!chartDiv) {
         console.error("Chart container not found.");
+        return;
+    }
+
+    // Prevent displaying "No data" message on initial load
+    if (isInitialLoad) {
+        chartDiv.innerHTML = "";
         return;
     }
 

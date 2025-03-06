@@ -205,6 +205,27 @@ function initProportionToggles() {
     });
 }
 
+// Function to initialize dropwdown for members
+function initRadarDropdown(members) {
+    console.log("Initializing radar dropdown with members:", members);
+
+    const dropdown = document.getElementById("radar-member-select");
+    if (!dropdown) {
+        console.error("Radar chart member list not found.");
+        return;
+    }
+
+    dropdown.innerHTML = "";
+    dropdown.append(new Option("-- Select a Member --", ""));
+
+    members.forEach(member => {
+        let option = document.createElement("option");
+        option.value = member.bioguide_id;
+        option.textContent = `${member.name} (${member.state})`;
+        dropdown.appendChild(option);
+    });
+}
+
 // Event listener to load radar chart data on page load
 document.addEventListener('DOMContentLoaded', function() {
     loadRadarChartData();

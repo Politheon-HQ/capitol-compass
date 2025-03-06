@@ -102,11 +102,13 @@ svg.main-container {
 ================================= */
 .tabs {
     display: flex;
+    justify-content: flex-end;
+    padding: 10px;
     gap: 10px;
 }
 
 .tabs button {
-    padding: 10px;
+    padding: 10px 15px;
     cursor: pointer;
     border: none;
     background-color: #ddd
@@ -190,7 +192,21 @@ svg.main-container {
     height: 100%;
 }
 
+#controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 10px;
+}
 
+#radar-member-select {
+    width: 100%;
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: white;
+}
 
 /* ==============================
     Ideology Chart Styling
