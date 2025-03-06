@@ -1,0 +1,2 @@
+gallop_app/static/data/congressional_districts.geojson filter=lfs diff=lfs merge=lfs -text
+gallop_app/static/data/us_states.geojson filter=lfs diff=lfs merge=lfs -text
