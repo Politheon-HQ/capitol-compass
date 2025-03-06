@@ -1,0 +1,102 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gallop</title>
+
+    <!-- Link External CSS -->
+     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+    <!-- Include Plotly.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+
+    <!-- Link JavaScript Files -->
+    <script src="{% static 'js/membersProfile.js' %}"></script>
+    <script src="{% static 'js/congress_map.js' %}"></script>
+    <script src="{% static 'js/radarChart.js' %}"></script>
+    <script src="{% static 'js/radarChartInfo.js' %}"></script>
+    <script src="{% static 'js/ideologyChart.js' %}"></script>
+    <script src="{% static 'js/tabs.js' %}"></script>
+</head>
+<body>
+    <!-- Main Header -->
+    <header class="main-header">
+        <h1>Gallop</h1>
+    </header>
+
+    <div class="dashboard-container">
+        <!-- Dashboard Header -->
+        <div class="dashboard-header">
+            <div class="header-left">Congressional Dashboard</div>
+            <div class="header-right">
+                Welcome! Find information about your state and elected officials here.
+                <br>Select a State from the Map, or click on one of the Tabs to get started.
+            </div>
+        </div>
+
+        <!-- Buttons for Navigation -->
+        <div class="button-container">
+            <button id="backToNationalView" onclick="resetView()" style="display: none;"><- Back to National View</button>
+            <button id="backToStateView" onclick="backToStateView()" style="display: none;"><- Back to State View</button>
+        </div>
+
+        <!-- Tabs for Sidebar Navigation -->
+        <div class="tabs">
+            <button onclick="loadTab('general')" class="active">General</button>
+            <button onclick="loadTab('members')">Members</button>
+            <button onclick="loadTab('radar-chart')">Radar Chart</button>
+            <button onclick="loadTab('ideology-chart')">Ideology Chart</button>
+        </div>
+
+        <!-- Main Layout -->
+        <div class="main-container">
+            <!-- Map Container -->
+            <div id="map-container">
+                <div id="plotly-map"></div>
+            </div>
+
+            <!-- Sidebar for Dynamic Content -->
+            <div id="sidebar">
+                <div id="general-container" class="tab-container">
+                    <div id="sidebar-content">
+                        <h2>General Information</h2>
+                        <div id="member-details">
+                            <p>Select a State from the Map, or click on one of the Tabs to get started.</p>
+                        </div>
+                    </div>
+                </div>
+                
+
+                <!-- Radar Chart Container -->
+                <div id="radar-chart-container" class="tab-container" style="display: none;">
+                    <h2 id="radar-chart-title">Congress Members Radar Chart</h2>
+                    <div id="controls">
+                        <div class="toggle-controls">
+                            <label>
+                                <input type="radio" name="proportion-toggle" value="self" checked>
+                                Self Proportion
+                            </label>
+                            <label>
+                                <input type="radio" name="proportion-toggle" value="across_all">
+                                Across All Proportion
+                            </label>
+                        </div>
+                    </div>
+                    <div id="radar-chart"></div>
+                </div>
+
+                <!-- Ideology Chart Container -->
+                <div id="ideology-chart-container" class="tab-container" style="display: none;">
+                    <h2>Congress Members Ideology Chart</h2>
+
+                    <label for="topic-select">Select Topic:</label>
+                    <select id="topic-select"></select>
+                    <div id="ideology-chart"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

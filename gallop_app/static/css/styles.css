@@ -1,0 +1,220 @@
+/* ==============================
+    Global Styles
+================================= */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    /*background-color: #f8f9fa*/
+}
+
+/* ==============================
+    Main Header (Gallop Title)
+================================= */
+.main-header {
+    text-align: center;
+    background-color: white;
+    padding: 15px;
+    font-size: 24px;
+    font-weight: bold;
+    border-bottom: 2px solid #ccc;
+}
+
+/* ==============================
+    Dashboard Header (Top Section)
+================================= */
+.dashboard-header {
+    background-color: #003366;
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* ==============================
+    Layout & Structure
+================================= */
+.dashboard-container {
+    max-width: 1500px;
+    margin: 20px auto;
+    /*background: white;*/
+    padding: 20px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+/* ==============================
+    Main Dahsboard Layout
+================================= */
+.main-container {
+    display: flex;
+    gap: 20px;
+}
+
+/* Map Section */
+#map-container {
+    width:60%;
+    height: 600px;
+    border-radius: 8px;
+    background-color: #f4f4f4;
+}
+
+#plotly-map {
+    width: 100%;
+    height: 100%;
+}
+
+.plot-container {
+    background: transparent !important
+}
+
+.js-plotly-plot {
+    background: transparent !important
+}
+
+svg.main-container {
+    background: transparent !important
+}
+
+.choroplethlocation {
+    fill-opacity: 1 !important;
+    opacity: 1 !important;
+}
+
+/* Sidebar */
+#sidebar {
+    width: 40%;
+    background-color: #f4f4f4;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+/* Sidebar Content */
+#sidebar-content {
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+/* ==============================
+    Sidebar & Tabs Styling
+================================= */
+.tabs {
+    display: flex;
+    gap: 10px;
+}
+
+.tabs button {
+    padding: 10px;
+    cursor: pointer;
+    border: none;
+    background-color: #ddd
+}
+
+.tabs button.active {
+    background-color: #003366;
+    color: white;
+}
+
+/* ==============================
+    Members Profile Styling
+================================= */
+#member-details {
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+    overflow-y: auto;
+    border: 2px solid #5c5252;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #f2f2f2;
+}
+
+.member-profile {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 5px;
+    font-size: 12px;
+    background-color: white;
+}
+
+.profile-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 30%;
+    object-fit: cover;
+    margin-right: 10px;
+}
+
+.member-info {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    gap: 5px;
+}
+
+.left-column {
+    flex: 1;
+    padding-right: 1px;
+    margin-right: 0;
+    text-align: left;
+    width: 50%;
+}
+
+.right-column {
+    width: 50%;
+}
+
+/* ==============================
+    Radar Chart Styling
+================================= */
+#radar-chart-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: auto;
+    padding: 10px;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+#radar-chart {
+    width: 100%;
+    height: 100%;
+}
+
+
+
+/* ==============================
+    Ideology Chart Styling
+================================= */
+#ideology-chart-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#topic-select {
+    width: 100%;
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: white;
+    margin-bottom: 10px;
+}
+
+#ideology-chart {
+    width: 100%;
+    height: 400px;
+    background: white;
+    border-radius: 8px;
+    padding: 10px
+}
