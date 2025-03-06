@@ -1,0 +1,28 @@
+# Ignore Conda environment
+conda/
+env/
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore Jupyter Notebook checkpoints (if using Jupyter)
+.ipynb_checkpoints/
+
+# Ignore logs and temporary files
+logs/
+*.log
+*.sqlite
+
+# Ignore virtual environments 
+venv/
+env/
+*.venv
+
+# Ignore LFS cache files
+.lfsconfig
