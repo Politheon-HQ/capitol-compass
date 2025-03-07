@@ -153,6 +153,5 @@ function updateIdeologyChart(data, title = "Ideology Distribution by State", isI
 // Event listener to load radar chart data on page load
 document.addEventListener('DOMContentLoaded', async function() {
     let { ideologyData, ideologyTopics } = await loadIdeologyData();
-    populateTopicDropdown(ideologyTopics);
     loadIdeologyChart();
 });

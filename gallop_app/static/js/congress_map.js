@@ -119,19 +119,17 @@ function stateClicked(stateID) {
 
     // Extract state abbreviation from selected state
     let stateAbbr = stateFeature.properties.STUSPS;
-    console.log("State abbreviation:", stateAbbr);
-
     let stateName = stateFeature.properties.NAME;
-    console.log("State name:", stateName);
 
     // Filter districts that belong to the state
     let stateDistricts = districts.features.filter(d =>
         d.properties.OFFICE_ID.startsWith(stateAbbr)
     );
-    console.log("State districts:", stateDistricts);
 
     let center = getGeoCenter(stateFeature.geometry);
-    console.log("Center coordinates:", center);
+    
+    // Switch to 'Members' tab
+    loadTab("members");
 
     // Clear all district traces
     let numTraces = document.getElementById("plotly-map").data.length;
@@ -177,11 +175,13 @@ function stateClicked(stateID) {
     updateButtonVisibility(true, false);
     console.log("State clicked:", stateAbbr);
 
-    // Load members and radar chart data (if selected)
-    if (document.querySelector(`[onclick="loadTab('general')"].active`)) {
-        console.log("Calling updateMemberProfile with:", stateName);
-        updateMemberProfile(stateName);
-    }
+    updateMemberProfile(stateName);
+    console.log("Calling updateMemberProfile for:", stateName);
+
+   // Load members and radar chart data (if selected)
+   if (document.querySelector(`[onclick="loadTab('radar-chart')"].active`)) {
+        updateRadarChart(window.selectedMemberID);
+    }   
 }
 
 // Function to zoom into a district
@@ -207,7 +207,7 @@ function districtClicked(districtID) {
     updateButtonVisibility(false, true);
 
     // Load members and radar chart data (if selected)
-    if (document.querySelector(`[onclick="loadTab('general')"].active`)) {
+    if (document.querySelector(`[onclick="loadTab('members')"].active`)) {
         updateMemberProfile(lastSelectedState, districtNum);
     }
     if (document.querySelector(`[onclick="loadTab('radar-chart')"].active`)) {
@@ -244,6 +244,9 @@ function resetView() {
             <p>Select a state from the Map, or click on one of the Tabs to get started.</p>
         `;
     }
+
+    const sidebarTitle = document.querySelector("#sidebar-content h2");
+    sidebarTitle.textContent = "";
 }
 
 // Function to go back to state view

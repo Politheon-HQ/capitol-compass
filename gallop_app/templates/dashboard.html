@@ -39,6 +39,7 @@
         <!-- Tabs for Sidebar Navigation -->
         <div class="tabs">
             <button data-tab="general" onclick="loadTab('general')" class="active">General</button>
+            <button data-tab="members" onclick="loadTab('members')">Members</button>
             <button data-tab="radar-chart" onclick="loadTab('radar-chart')">Radar Chart</button>
             <button data-tab="ideology-chart" onclick="loadTab('ideology-chart')">Ideology Chart</button>
         </div>
@@ -57,8 +58,16 @@
             <!-- Sidebar for Dynamic Content -->
             <div id="sidebar">
                 <div id="general-container" class="tab-container">
+                    <h2 id="general-title">General Information</h2>
+                    <div id="general-content">
+                        <p>Select a State from the Map, or click on one of the Tabs to get started.</p>
+                    </div>
+                </div>
+
+                <!-- Members Container -->
+                <div id="members-container" class="tab-container" style="display: none;">
+                    <h2 id="members-title">Member Information<h2>
                     <div id="sidebar-content">
-                        <h2>General Information</h2>
                         <div id="member-details">
                             <p>Select a State from the Map, or click on one of the Tabs to get started.</p>
                         </div>

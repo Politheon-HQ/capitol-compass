@@ -13,15 +13,13 @@ function loadTab(tabName) {
     
     // Handle tab-specific content updates
     if (tabName === "general") {
+        console.log("Loading general tab...");
+    } else if (tabName === "members") {
         // Restore previous member list when switching back to "General"
         if (window.previousMemberList && window.previousMemberList.length > 0) {
             console.log("Restoring previous member list....");
             restorePreviousMemberList();
-        }
-    } else if (tabName === "members") {
-        // Load members list if switching to the Members tab
-        console.log("Loading members list...");
-        updateMemberProfile(window.lastSelectedState, window.lastSelectedDistrict);
+        } 
     } else if (tabName === "radar-chart") {
         // Load radar chart if switching to the Radar Chart tab
         console.log("Loading radar chart...");

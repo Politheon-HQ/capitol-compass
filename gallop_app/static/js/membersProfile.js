@@ -37,7 +37,16 @@ function updateMemberProfile(stateID, districtNumber = null) {
     }
 
     const memberDetails = document.getElementById("member-details");
-    let sidebarTitle = document.querySelector("#sidebar-content h2");
+    memberDetails.innerHTML = "";
+
+    let titleHTML = (districtNumber != null)
+        ? `Congress Members for ${stateID} - District ${districtNumber}`
+        : `Congress Members for ${stateID}`;
+
+    const titleElement = document.createElement("h2");
+    titleElement.id = "member-title";
+    titleElement.textContent = titleHTML;
+    memberDetails.appendChild(titleElement);
 
     // Filter members by state
     const stateMembers = window.membersData.filter(member => member.state === stateID);
@@ -48,7 +57,6 @@ function updateMemberProfile(stateID, districtNumber = null) {
 
     // If district number is provided, filter by district
     if (districtNumber != null) {
-        sidebarTitle.textContent = `Congress Members for ${stateID} - District ${districtNumber}`;
         let parsedDistrict = parseInt(districtNumber, 10);
         let districtMembers = stateMembers.filter(member => parseInt(member.district, 10) === parsedDistrict);
 
@@ -59,7 +67,6 @@ function updateMemberProfile(stateID, districtNumber = null) {
             memberDetails.innerHTML = `<p>No members found for District ${districtNumber} in ${stateID}.</p>`;
         }
     } else {
-        sidebarTitle.textContent = `Congress Members for ${stateID}`;
         renderMemberList(stateMembers);
     }
 }
@@ -77,8 +84,7 @@ function renderMemberList(members) {
     window.previousMemberList = members;
 
     // Clear previous content
-    console.log("Before update, member-details content:", memberDetails.innerHTML);
-    memberDetails.innerHTML = "";   
+    console.log("Before update, member-details content:", memberDetails.innerHTML);  
 
     members.forEach(member => {
         console.log("Rendering member:", member.name);
