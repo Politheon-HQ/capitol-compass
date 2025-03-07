@@ -4,6 +4,7 @@ let currentViewLevel = "national";  // Tracks zoom state: "national", "state", "
 let lastSelectedState = null;
 let lastSelectedDistrict = null;
 let states, districts;
+let stateDistricts = [];
 
 
 // Load GeoJSON data from API
@@ -65,7 +66,7 @@ function initPlotlyMap() {
         geo: {
             scope: "usa",
             showlakes: false,
-            showland: true,
+            showland: false,
             lakescolor: "rgba(244,244,244,1)",
             bgcolor: "rgba(244,244,244,1)",
         },
@@ -98,11 +99,12 @@ function initPlotlyMap() {
         console.log("Clicked point:", clickedPoint);
 
         let isStateClick = states.features.find(d => d.properties.STATEFP === clickedPoint);
+        let isDistrictClick = districts.features.find(d => d.properties.OFFICE_ID === clickedPoint);
 
         if (isStateClick) {
             console.log(`Clicked on state: ${clickedPoint}`);
             stateClicked(clickedPoint);
-        } else if (currentViewLevel === "state") {
+        } else if (isDistrictClick) {
             districtClicked(clickedPoint);
         }
     });
@@ -122,11 +124,37 @@ function stateClicked(stateID) {
     let stateName = stateFeature.properties.NAME;
 
     // Filter districts that belong to the state
-    let stateDistricts = districts.features.filter(d =>
+    stateDistricts = districts.features.filter(d =>
         d.properties.OFFICE_ID.startsWith(stateAbbr)
     );
 
-    let center = getGeoCenter(stateFeature.geometry);
+    let { minLon, maxLon, minLat, maxLat } = getGeoBounds(stateFeature.geometry);
+    let lonRange = maxLon - minLon;
+    let latRange = maxLat - minLat;
+
+    // Apply extra padding for large states
+    let lonPadding, latPadding;
+    if (["CA", "TX", "NV"].includes(stateAbbr)) {
+        lonPadding = lonRange * 0.25;
+        latPadding = latRange * 0.3;
+    } else if (lonRange > 15 || latRange > 10) {
+        lonPadding = lonRange * 0.15;
+        latPadding = latRange * 0.15;
+    } else {
+        lonPadding = lonRange * 0.1;
+        latPadding = latRange * 0.1;
+    }
+
+    // Adjust bounding box
+    let adjMinLon = minLon - lonPadding;
+    let adjMaxLon = maxLon + lonPadding;
+    let adjMinLat = minLat - latPadding;
+    let adjMaxLat = maxLat + latPadding;
+
+    // Calculate new center and zoom scale
+    let newLonCenter = (adjMinLon + adjMaxLon) / 2;
+    let newLatCenter = (adjMinLat + adjMaxLat) / 2;
+    let optimalScale = calculateZoom(adjMinLon, adjMaxLon, adjMinLat, adjMaxLat);
     
     // Switch to 'Members' tab
     loadTab("members");
@@ -140,9 +168,8 @@ function stateClicked(stateID) {
     }
 
     Plotly.relayout("plotly-map", {
-        "geo.center.lon": center[0],
-        "geo.center.lat": center[1],
-        "geo.projection.scale": 5,
+        "geo.center": { lon: newLonCenter, lat: newLatCenter },
+        "geo.projection.scale": optimalScale,
     });
 
     Plotly.restyle("plotly-map", { visible: false }, [1]);
@@ -153,7 +180,11 @@ function stateClicked(stateID) {
         locations: stateDistricts.map(d => d.properties.OFFICE_ID),
         z: stateDistricts.map(d => d.properties.PARTY === "R" ? 1 : 0),
         featureidkey: "properties.OFFICE_ID",
-        colorscale: [[0, "rgba(247, 23, 19, 0.8)"], [1, "rgba(51, 7, 246, 0.93)"]],
+        colorscale: [
+            [0, "rgba(247, 23, 19, 0.8)"],
+            [0.5, "yellow"], 
+            [1, "rgba(51, 7, 246, 0.93)"],
+        ],
         autocolorcale: false,
         reversescale: true,
         zmin: 0,
@@ -187,28 +218,43 @@ function stateClicked(stateID) {
 // Function to zoom into a district
 function districtClicked(districtID) {
     let districtFeature = districts.features.find(d => d.properties.OFFICE_ID === districtID);
+    console.log("District feature:", districtFeature);
     if (!districtFeature) return;
-    let center = getGeoCenter(districtFeature.geometry);
+
+    let { minLon, maxLon, minLat, maxLat } = getGeoBounds(districtFeature.geometry);
+    let lonCenter = (minLon + maxLon) / 2;
+    let latCenter = (minLat + maxLat) / 2;
+    let optimalScale = calculateZoom(minLon, maxLon, minLat, maxLat);
 
     let stateAbbr = districtFeature.properties.OFFICE_ID.slice(0, 2);
-    let districtNum = districtFeature.properties.STATEFP20;
 
-    console.log(`District clicked: ${districtNum} in ${stateAbbr}`);
+    // Restore previous district color
+    if (lastSelectedDistrict !== null) {
+        Plotly.restyle("plotly-map", {
+            z: stateDistricts.map(d => d.properties.PARTY === "R" ? 1 : 0),
+        }, [1]);
+    }
+                 
+    // Highlight selected district
+    let newZValues = stateDistricts.map(d => d.properties.OFFICE_ID === districtID ? 0.5 : (d.properties.PARTY === "R" ? 1 : 0));
+    console.log("New Z values:", newZValues);
+    Plotly.restyle("plotly-map", {
+        z: [newZValues],
+    }, [1]);
 
     Plotly.relayout("plotly-map", {
-        "geo.center.lon": center[0],
-        "geo.center.lat": center[1],
-        "geo.projection.scale": 10
+        "geo.center": { lon: lonCenter, lat: latCenter },
+        "geo.projection.scale": optimalScale
     });
-
+    
     currentViewLevel = "district";
     lastSelectedDistrict = districtID;
-
     updateButtonVisibility(false, true);
 
     // Load members and radar chart data (if selected)
     if (document.querySelector(`[onclick="loadTab('members')"].active`)) {
-        updateMemberProfile(lastSelectedState, districtNum);
+        console.log("Calling updatateMemberProfile for district:", stateAbbr, lastSelectedDistrict.slice(-2));
+        updateMemberProfile(lastSelectedState, lastSelectedDistrict.slice(-2));
     }
     if (document.querySelector(`[onclick="loadTab('radar-chart')"].active`)) {
         updateRadarChart(window.selectedMemberID);
@@ -233,8 +279,6 @@ function resetView() {
 
     currentViewLevel = "national";
     lastSelectedState = null;
-    lastSelectedDistrict = null;
-
     updateButtonVisibility(false, false);
 
     // Reset sidebar content to the original welcome message
@@ -252,20 +296,26 @@ function backToStateView() {
 
     let stateFeature = states.features.find(d => d.properties.NAME === lastSelectedState);
     if (!stateFeature) return;
-    let center = getGeoCenter(stateFeature.geometry);
+    let { minLon, maxLon, minLat, maxLat } = getGeoBounds(stateFeature.geometry);
+    let center = [(minLon + maxLon) / 2, (minLat + maxLat) / 2];
+    let optimalScale = calculateZoom(minLon, maxLon, minLat, maxLat);
+
 
     Plotly.relayout("plotly-map", {
         "geo.center.lon": center[0],
         "geo.center.lat": center[1],
-        "geo.projection.scale": 5.5
+        "geo.projection.scale": optimalScale
     });
 
     // Restore state trace visibility
     Plotly.restyle("plotly-map", { visible: true }, [0]);
 
+    let originalValues = stateDistricts.map(d => d.properties.PARTY === "R" ? 1 : 0);
+    Plotly.restyle("plotly-map", { z: [originalValues] }, [1]);
+    
+
     currentViewLevel = "state";
     lastSelectedDistrict = null;
-
     updateButtonVisibility(true, false);
 
     // Reset the sidebar to show all members of the state
@@ -273,7 +323,7 @@ function backToStateView() {
 }
 
 // Function to calculate geometric center of a feature
-function getGeoCenter(geometry) {
+function getGeoBounds(geometry) {
     if (!geometry || !geometry.coordinates) {
         console.error("Invalid geometry:", geometry);
         return [0, 0];  // Default to center of the map
@@ -283,10 +333,38 @@ function getGeoCenter(geometry) {
         ? geometry.coordinates.flat(2)  // Flatten multi-polygons
         : geometry.coordinates[0]; // Single polygon
 
-    let avgLon = allCoords.reduce((sum, c) => sum + c[0], 0) / allCoords.length;
-    let avgLat = allCoords.reduce((sum, c) => sum + c[1], 0) / allCoords.length;
+    let lats = allCoords.map(c => c[1]);  // Extract latitudes
+    let lons = allCoords.map(c => c[0]);  // Extract longitudes
 
-    return [avgLon, avgLat];
+    let minLon = Math.min(...lons);
+    let maxLon = Math.max(...lons);
+    let minLat = Math.min(...lats);
+    let maxLat = Math.max(...lats);
+
+    return { minLon, maxLon, minLat, maxLat };
+}
+
+function calculateZoom(minLon, maxLon, minLat, maxLat) {
+    let latDiff = maxLat - minLat;
+    let lonDiff = maxLon - minLon;
+
+    let baseScale = 5;
+    let scaleFactor = Math.max(lonDiff, latDiff) * 0.1;
+    let optimalScale;
+
+    // Dynamically adjust zoom based on state size
+    if (lonDiff > 15 || latDiff > 10) {
+        // Large states
+        optimalScale = baseScale - (scaleFactor * 1.65);
+    } else if (lonDiff > 5 || latDiff > 5) {
+        // Medium states
+        optimalScale = baseScale - scaleFactor;
+    } else {
+        // Small states
+        optimalScale = baseScale - (scaleFactor * 0.7);
+    }
+
+    return Math.max(2, Math.min(optimalScale, 6));
 }
 
 // Function to update button visibility
