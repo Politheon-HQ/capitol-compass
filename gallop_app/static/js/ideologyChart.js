@@ -150,8 +150,15 @@ function updateIdeologyChart(data, title = "Ideology Distribution by State", isI
     });
 }
 
+async function ensureIdeologyDataLoaded() {
+    if (!window.ideologyData || window.ideologyData.length === 0) {
+        console.warn("Ideology data not loaded. Fetching data...");
+        await loadIdeologyData();
+    }
+}
+
 // Event listener to load radar chart data on page load
 document.addEventListener('DOMContentLoaded', async function() {
-    let { ideologyData, ideologyTopics } = await loadIdeologyData();
+    await ensureIdeologyDataLoaded();
     loadIdeologyChart();
 });

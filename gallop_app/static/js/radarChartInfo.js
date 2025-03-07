@@ -176,7 +176,7 @@ function updateRadarChart(bioguideId) {
 }
 
 // Function to load radar chart data from CSV
-function loadRadarChartData() {
+async function loadRadarChartData() {
     console.log("Loading radar chart data...");
 
     Papa.parse("/static/data/congress_members_with_proportions.csv", {
@@ -226,8 +226,15 @@ function initRadarDropdown(members) {
     });
 }
 
+async function ensureRadarDataLoaded() {
+    if (!window.congressMembersData || window.congressMembersData.length === 0) {
+        console.warn("Radar chart data not loaded. Fetching data...");
+        await loadRadarChartData();
+    }
+}
+
 // Event listener to load radar chart data on page load
-document.addEventListener('DOMContentLoaded', function() {
-    loadRadarChartData();
+document.addEventListener('DOMContentLoaded', async function() {
+    await loadRadarChartData();
     initProportionToggles();
 });

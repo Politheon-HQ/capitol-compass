@@ -240,13 +240,10 @@ function resetView() {
     // Reset sidebar content to the original welcome message
     const sidebarContent = document.getElementById("member-details");
     if (sidebarContent) {
-        sidebarContent.innerHTML = `
-            <p>Select a state from the Map, or click on one of the Tabs to get started.</p>
-        `;
+        sidebarContent.innerHTML = "";
+        sidebarContent.classList.remove("has-content");
     }
 
-    const sidebarTitle = document.querySelector("#sidebar-content h2");
-    sidebarTitle.textContent = "";
 }
 
 // Function to go back to state view

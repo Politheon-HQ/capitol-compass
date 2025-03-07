@@ -47,7 +47,7 @@ body {
 ================================= */
 .main-container {
     display: flex;
-    gap: 20px;
+    gap: 10px;
 }
 
 /* Map Section */
@@ -144,7 +144,13 @@ svg.main-container {
 /* ==============================
     Members Profile Styling
 ================================= */
+/* Default: No border when empty */
 #member-details {
+    border: none;
+}
+
+/* Show border when content exists */
+#member-details.has-content {
     display: flex;
     flex-direction: column;
     max-height: 80vh;
@@ -152,7 +158,22 @@ svg.main-container {
     border: 2px solid #5c5252;
     padding: 10px;
     border-radius: 5px;
-    /*background-color: #f2f2f2;*/
+    background-color: #aeafaf;
+}
+
+#member-details h4 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 5px;
+    margin-top: 5px;
+    padding: 5px 0;
+}
+
+#members-content {
+    font-size: 14px;
+    font-weight: normal;
 }
 
 .member-profile {

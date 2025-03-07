@@ -25,25 +25,19 @@ async function loadCongressMembers() {
 }
 
 // Function to update members based on state selection
-function updateMemberProfile(stateID, districtNumber = null) {
+async function updateMemberProfile(stateID, districtNumber = null) {
     console.log(`Updating member profile for state: ${stateID}, district: ${districtNumber}`);
-
-    if (!window.membersData || window.membersData.length === 0) {
-        loadCongressMembers().then(() => {
-            updateMemberProfile(stateID, districtNumber);
-        });
-        document.getElementById("member-details").innerHTML = `<p>Loading members...</p>`;
-        return;
-    }
+    await ensureCongressMembersLoaded();
 
     const memberDetails = document.getElementById("member-details");
     memberDetails.innerHTML = "";
+    memberDetails.classList.remove("has-content");
 
     let titleHTML = (districtNumber != null)
         ? `Congress Members for ${stateID} - District ${districtNumber}`
         : `Congress Members for ${stateID}`;
 
-    const titleElement = document.createElement("h2");
+    const titleElement = document.createElement("h4");
     titleElement.id = "member-title";
     titleElement.textContent = titleHTML;
     memberDetails.appendChild(titleElement);
@@ -54,6 +48,7 @@ function updateMemberProfile(stateID, districtNumber = null) {
         memberDetails.innerHTML = `<p>No members found for ${stateID}.</p>`;
         return;
     }
+    memberDetails.classList.add("has-content");
 
     // If district number is provided, filter by district
     if (districtNumber != null) {
@@ -116,7 +111,7 @@ function renderMemberList(members) {
             <span><strong>Party:</strong> ${member.partyName}</span><br>
             <span><strong>Chamber:</strong> ${member.chamber}</span><br>
             ${districtDisplay}
-            <span><strong>Years Active:</strong> ${member.startYear} - Present</span><br>
+            <span><strong>Active:</strong> ${member.startYear} - Present</span><br>
             <span><strong>Bills Sponsored:</strong> ${member.sponsoredLegislation}</span><br>
             <span><strong>Bills Co-sponsored:</strong> ${member.cosponsoredLegislation}</span><br>
         `;
@@ -151,10 +146,12 @@ function renderMemberList(members) {
     console.log("Member profiles rendered successfully.");
 }
 
-// Load Congress members on page load
-loadCongressMembers().then(() => {
-    console.log("Congress members loaded successfully.", window.membersData);
-});
+async function ensureCongressMembersLoaded() {
+    if (!window.membersData || window.membersData.length === 0) {
+        console.warn("Congress members not loaded. Fetching data...");
+        await loadCongressMembers();
+    }
+}
 
 // Function to restore previous members list when switching back to General
 function restorePreviousMemberList() {
