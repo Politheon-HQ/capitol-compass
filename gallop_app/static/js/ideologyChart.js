@@ -63,7 +63,7 @@ function loadIdeologyChart() {
         if (filteredData.length === 0) {
             updateIdeologyChart([], "No data found for selected topic.");
         } else {
-            updateIdeologyChart(filteredData, `Topic: ${selectedTopic}`);
+            updateIdeologyChart(filteredData);
         }
     });
 
@@ -81,7 +81,7 @@ function populateTopicDropdown(topics) {
     }
 
     dropdown.innerHTML = "";
-    dropdown.append(new Option("--Select a Topic--", ""));
+    dropdown.append(new Option("-- Select a Topic --", ""));
 
     topics.forEach(topic => {
         let option = document.createElement("option");
@@ -110,7 +110,7 @@ function getDataForTopic(data, topic) {
 }
 
 // Function to update ideology chart
-function updateIdeologyChart(data, title = "Ideology Distribution by State", isInitialLoad = false) {
+function updateIdeologyChart(data, isInitialLoad = false) {
     let chartDiv = document.getElementById("ideology-chart");
 
     if (!chartDiv) {
@@ -137,9 +137,15 @@ function updateIdeologyChart(data, title = "Ideology Distribution by State", isI
     };
 
     let layout = {
-        title: title,
-        xaxis: { title: "State" },
+        title: "Ideology Distribution by State",
+        xaxis: { 
+            title: "State",
+            tickangle: -45,
+            automargin: true
+        },
         yaxis: { title: "Count" },
+        margin: { l: 70, r: 40, t: 50, b: 100 },
+        autosize: true,
     };
 
     Plotly.newPlot('ideology-chart', [trace], layout, {
@@ -156,9 +162,3 @@ async function ensureIdeologyDataLoaded() {
         await loadIdeologyData();
     }
 }
-
-// Event listener to load radar chart data on page load
-document.addEventListener('DOMContentLoaded', async function() {
-    await ensureIdeologyDataLoaded();
-    loadIdeologyChart();
-});

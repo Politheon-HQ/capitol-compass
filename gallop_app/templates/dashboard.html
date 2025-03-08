@@ -32,7 +32,6 @@
             <div class="header-left">Congressional Dashboard</div>
             <div class="header-right">
                 Welcome! Find information about your state and elected officials here.
-                <br>Select a State from the Map, or click on one of the Tabs to get started.
             </div>
         </div>
 
@@ -60,7 +59,28 @@
                 <div id="general-container" class="tab-container">
                     <h2 id="general-title">General Information</h2>
                     <div id="general-content">
-                        <p>Select a State from the Map, or click on one of the Tabs to get started.</p>
+                        <p>
+                            This interactive dashboard provides insights into the U.S. Congress by visualizing
+                            data about representatives, legislation, and political trends. Use the navigation
+                            tabs at the top to explore different aspects of congressional data.
+                        </p>
+
+                        <h3>How to Use the Dashboard</h3>
+                        <u1>
+                            <strong>Select a State:</strong> Click a state on the map to view its congressional members.
+                            <strong>Select a District:</strong> Zoom into a state and click on a district to see specific representatives.<br>
+                            <strong>Use the Tabs:</strong> Switch between different views using the navigation buttons at the top.
+                        </u1>
+
+                        <h3>Dashboard Features</h3>
+                        <u1>
+                            <strong>Map:</strong> Click on a state to view its congressional representatives.<br>
+                            <strong>Members:</strong> View detailed information about individual members of Congress.<br>
+                            <strong>Radar Chart:</strong> Compare the voting patterns and legislative priorities of selected members.<br>
+                            <strong>Ideology Chart:</strong> Analyze congressional trends on key political topics and compare states.<br>
+                        </u1>
+
+                        <p><em>Select a state from the map or explore the tabs to get started!</em></p>
                     </div>
                 </div>
 
@@ -68,7 +88,7 @@
                 <div id="members-container" class="tab-container" style="display: none;">
                     <h2 id="members-title">Member Information</h2>
                     <div id="members-content">
-                        <p>Select a State from the Map, or click on one of the Tabs to get started.</p>
+                        <p>Select a state from the map to view member information.</p>
                     </div>
                     <div id="sidebar-content">
                         <div id="member-details"></div>
@@ -110,7 +130,9 @@
                     <h2>Congress Members Ideology Chart</h2>
 
                     <label for="topic-select">Select Topic:</label>
-                    <select id="topic-select"></select>
+                    <select id="topic-select">
+                        <option value="">-- Select a Topic --</option>
+                    </select>
                     <div id="ideology-chart"></div>
                 </div>
             </div>

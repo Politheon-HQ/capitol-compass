@@ -120,9 +120,6 @@ function updateRadarChart(bioguideId) {
     const member = window.congressMembersData.find(d => d.bioguide_id === bioguideId);
     if (!member) return console.error(`Member with ID ${bioguideId} not found`);
 
-    // Update title dynamically
-    document.getElementById("radar-chart-title").textContent = `Radar Chart for ${member.name}`;
-
     let radarData = getRadarData(member);
 
     // Trace for Congress Member

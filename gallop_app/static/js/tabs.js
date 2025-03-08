@@ -47,15 +47,9 @@ function loadTab(tabName) {
         // Load ideology chart if switching to the Ideology tab
         console.log("Loading ideology chart...");
 
-        if (!window.loadIdeologyData || !window.ideologyData.length === 0) {
-            console.warn("Ideology data not loaded. Fetching data...");
-            return;
-        }
-
-        if (window.ideologyTopics) {
-            populateTopicDropdown(window.ideologyTopics);
-        }
-        loadIdeologyChart();
+        ensureIdeologyDataLoaded().then(() => {
+            loadIdeologyChart();
+        });
     }
 
     // Update active tab styling
