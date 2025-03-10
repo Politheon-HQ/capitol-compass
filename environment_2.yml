@@ -1,0 +1,31 @@
+name: gallop_env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10  # Downgraded from 3.13 for stability
+  - numpy
+  - pandas
+  - scipy
+  - scikit-learn
+  - bottleneck
+  - matplotlib
+  - seaborn
+  - requests
+  - pip
+  - setuptools
+  - wheel
+  - proj
+  - gdal
+  - geos
+  - geotiff
+  - libtiff
+  - libpng
+  - sqlite
+  - openssl
+  - tzdata
+  - pip:
+      - asgiref==3.8.1
+      - django==5.1.5
+      - mysql-connector-python==9.2.0
+      - sqlparse==0.5.3
