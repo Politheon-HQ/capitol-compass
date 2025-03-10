@@ -11,12 +11,11 @@ let stateDistricts = [];  // Store districts of the currently selected state
 
 // Load GeoJSON data from API
 Promise.all([
-    fetch("/static/data/us_states.geojson").then(response => response.json()),
-    fetch("/static/data/congressional_districts.geojson").then(response => response.json())
-        
+    fetch("/static/data/us_states.topojson").then(response => response.json()),
+    fetch("/static/data/congressional_districts.topojson").then(response => response.json())
 ]).then(([loadedStates, loadedDistricts]) => {
-    states = loadedStates;
-    allDistricts = loadedDistricts;
+    states = topojson.feature(loadedStates, loadedStates.objects.us_states);;
+    allDistricts = topojson.feature(loadedDistricts, loadedDistricts.objects.congressional_districts);  // Convert TopoJSON to GeoJSON
     console.log("Loaded states and districts:", states, allDistricts);
     initPlotlyMap();
 }).catch(error => {
