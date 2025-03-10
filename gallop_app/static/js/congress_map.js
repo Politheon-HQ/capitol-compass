@@ -3,8 +3,10 @@
 let currentViewLevel = "national";  // Tracks zoom state: "national", "state", "district"
 let lastSelectedState = null;
 let lastSelectedDistrict = null;
-let states, districts;
-let stateDistricts = [];
+let states = null;
+let allDistricts = null;  // Store full districts data in memory
+let cachedDistricts = {};  // Cache for district data by state
+let stateDistricts = [];  // Store districts of the currently selected state
 
 
 // Load GeoJSON data from API
@@ -14,9 +16,9 @@ Promise.all([
         
 ]).then(([loadedStates, loadedDistricts]) => {
     states = loadedStates;
-    districts = loadedDistricts;
-    console.log("Loaded states and districts:", states, districts);
-    initPlotlyMap(states, districts);
+    allDistricts = loadedDistricts;
+    console.log("Loaded states and districts:", states, allDistricts);
+    initPlotlyMap();
 }).catch(error => {
     console.error("Error loading GeoJSON:", error);
 });
@@ -24,7 +26,6 @@ Promise.all([
 // Initialize Plotly map
 function initPlotlyMap() {
     let zValuesStates = states.features.map(d => d.properties.STATE_PARTY === "R" ? 1 : 0);
-    let zValuesDistricts = districts.features.map(d => d.properties.PARTY === "R" ? 1 : 0);
 
     let stateTrace = {
         type: "choropleth",
@@ -44,24 +45,6 @@ function initPlotlyMap() {
         text: states.features.map(d => `${d.properties.NAME} (${d.properties.STATE_PARTY})`),
     };
 
-    let districtTrace = {
-        type: "choropleth",
-        geojson: districts,
-        locations: districts.features.map(d => d.properties.OFFICE_ID),
-        z: zValuesDistricts,
-        featureidkey: "properties.OFFICE_ID",
-        colorscale: [[0, "rgba(247, 23, 19, 0.8)"], [1, "rgba(51, 7, 246, 0.89)"]],
-        autocolorcale: false,
-        reversescale: true,
-        zmin: 0,
-        zmax: 1,
-        showscale: false,
-        marker: { line: { color: "black", width: 1.5 } },
-        hoverinfo: "text",
-        text: districts.features.map(d => `${d.properties.LISTING_NAME} (${d.properties.PARTY}) - District ${d.properties.DISTRICT}`),
-        visible: false
-    }
-
     let layout = {
         geo: {
             scope: "usa",
@@ -74,21 +57,13 @@ function initPlotlyMap() {
         plot_bgcolor: "rgba(244,244,244,1)",
     };
 
-    console.log("Rendering state mep with:", stateTrace, districtTrace);
+    console.log("Rendering state mep with:", stateTrace);
 
-    Plotly.newPlot("plotly-map", [stateTrace, districtTrace], layout, {
+    Plotly.newPlot("plotly-map", [stateTrace], layout, {
         responsive: true,
         displayModeBar: false,
         scrollZoom: false,
         modeBarButtonsToRemove: ['toImage', 'sendDataToCloud', 'editInChartStudio', 'zoom2d', 'select2d', 'lasso2d']
-    }).then(() => {
-        setTimeout(() => {
-            let choroplethLayer = document.querySelector(".choroplethlayer");
-            if (choroplethLayer) {
-                choroplethLayer.parentNode.appendChild(choroplethLayer);
-                console.log("Choropleth layer moved to top");
-            }
-        }, 1000);
     });
 
     console.log("Plotly map initialized");
@@ -99,7 +74,7 @@ function initPlotlyMap() {
         console.log("Clicked point:", clickedPoint);
 
         let isStateClick = states.features.find(d => d.properties.STATEFP === clickedPoint);
-        let isDistrictClick = districts.features.find(d => d.properties.OFFICE_ID === clickedPoint);
+        let isDistrictClick = stateDistricts.find(d => d.properties.OFFICE_ID === clickedPoint);
 
         if (isStateClick) {
             console.log(`Clicked on state: ${clickedPoint}`);
@@ -110,10 +85,44 @@ function initPlotlyMap() {
     });
 }
 
+// Function to load district data
+function updateDistricts(districts) {
+    // Remove previous district traces
+    let numTraces = document.getElementById("plotly-map").data.length;
+    if (numTraces > 1) {
+        for (let i = numTraces - 1; i >= 1; i--) {
+            Plotly.deleteTraces("plotly-map", i);
+        }
+    }
+
+    let districtTrace = {
+        type: "choropleth",
+        geojson: { type: "FeatureCollection", features: districts },
+        locations: districts.map(d => d.properties.OFFICE_ID),
+        z: districts.map(d => d.properties.PARTY === "R" ? 1 : 0),
+        featureidkey: "properties.OFFICE_ID",
+        colorscale: [
+            [0, "rgba(247, 23, 19, 0.8)"],
+            [0.5, "yellow"], 
+            [1, "rgba(51, 7, 246, 0.93)"],
+        ],
+        autocolorcale: false,
+        reversescale: true,
+        zmin: 0,
+        zmax: 1,
+        showscale: false,
+        marker: { line: { color: "black", width: 1.5 } },
+        hoverinfo: "text",
+        text: stateDistricts.map(d => `${d.properties.LISTING_NAME} (${d.properties.PARTY}) - District ${d.properties.DISTRICT}`),
+        visible: true
+    };
+
+    Plotly.addTraces("plotly-map", districtTrace);
+}
+
 // Function to zoom into a state
 function stateClicked(stateID) {
     let stateFeature = states.features.find(d => d.properties.STATEFP === stateID);
-    console.log("State feature:", stateFeature);
     if (!stateFeature) {
         console.log("State not found:", stateID);
         return;
@@ -123,10 +132,10 @@ function stateClicked(stateID) {
     let stateAbbr = stateFeature.properties.STUSPS;
     let stateName = stateFeature.properties.NAME;
 
-    // Filter districts that belong to the state
-    stateDistricts = districts.features.filter(d =>
-        d.properties.OFFICE_ID.startsWith(stateAbbr)
-    );
+    console.log(`Checking data for districts of ${stateAbbr}`);
+    stateDistricts = cachedDistricts[stateAbbr] || allDistricts.features.filter(d => d.properties.OFFICE_ID.startsWith(stateAbbr));
+    cachedDistricts[stateAbbr] = stateDistricts;
+    updateDistricts(stateDistricts);
 
     let { minLon, maxLon, minLat, maxLat } = getGeoBounds(stateFeature.geometry);
     let lonRange = maxLon - minLon;
@@ -159,45 +168,10 @@ function stateClicked(stateID) {
     // Switch to 'Members' tab
     loadTab("members");
 
-    // Clear all district traces
-    let numTraces = document.getElementById("plotly-map").data.length;
-    if (numTraces > 1) {
-        for (let i = numTraces - 1; i >= 1; i--) {
-            Plotly.deleteTraces("plotly-map", i);
-        }
-    }
-
     Plotly.relayout("plotly-map", {
         "geo.center": { lon: newLonCenter, lat: newLatCenter },
         "geo.projection.scale": optimalScale,
     });
-
-    Plotly.restyle("plotly-map", { visible: false }, [1]);
-
-    let districtTrace = {
-        type: "choropleth",
-        geojson: { type: "FeatureCollection", features: stateDistricts },
-        locations: stateDistricts.map(d => d.properties.OFFICE_ID),
-        z: stateDistricts.map(d => d.properties.PARTY === "R" ? 1 : 0),
-        featureidkey: "properties.OFFICE_ID",
-        colorscale: [
-            [0, "rgba(247, 23, 19, 0.8)"],
-            [0.5, "yellow"], 
-            [1, "rgba(51, 7, 246, 0.93)"],
-        ],
-        autocolorcale: false,
-        reversescale: true,
-        zmin: 0,
-        zmax: 1,
-        showscale: false,
-        marker: { line: { color: "black", width: 1.5 } },
-        hoverinfo: "text",
-        text: stateDistricts.map(d => `${d.properties.LISTING_NAME} (${d.properties.PARTY}) - District ${d.properties.DISTRICT}`),
-        visible: true
-    };
-
-    Plotly.addTraces("plotly-map", districtTrace);
-    /*Plotly.restyle("plotly-map", { visible: [false, true] }, [1]);*/
 
     currentViewLevel = "state";
     lastSelectedState = stateName;
@@ -217,7 +191,7 @@ function stateClicked(stateID) {
 
 // Function to zoom into a district
 function districtClicked(districtID) {
-    let districtFeature = districts.features.find(d => d.properties.OFFICE_ID === districtID);
+    let districtFeature = stateDistricts.find(d => d.properties.OFFICE_ID === districtID);
     console.log("District feature:", districtFeature);
     if (!districtFeature) return;
 
@@ -228,19 +202,27 @@ function districtClicked(districtID) {
 
     let stateAbbr = districtFeature.properties.OFFICE_ID.slice(0, 2);
 
-    // Restore previous district color
-    if (lastSelectedDistrict !== null) {
-        Plotly.restyle("plotly-map", {
-            z: stateDistricts.map(d => d.properties.PARTY === "R" ? 1 : 0),
-        }, [1]);
+    // Get current trace index of districts
+    let plotData = document.getElementById("plotly-map").data;
+    let districtTraceIndex = plotData.findIndex(trace => trace.featureidkey === "properties.OFFICE_ID");
+
+    if (districtTraceIndex === -1) {
+        console.error("District trace not found.");
+        return;
     }
-                 
-    // Highlight selected district
-    let newZValues = stateDistricts.map(d => d.properties.OFFICE_ID === districtID ? 0.5 : (d.properties.PARTY === "R" ? 1 : 0));
+
+    if (lastSelectedDistrict !== null && lastSelectedDistrict !== districtID) {
+        console.log(`Restoring previous district: ${lastSelectedDistrict}`);
+        let previousValues = stateDistricts.map(d => d.properties.PARTY === "R" ? 1 : 0);
+        Plotly.restyle("plotly-map", { z: [previousValues] }, [districtTraceIndex]);
+    }
+
+    let newZValues = stateDistricts.map(d =>
+        d.properties.OFFICE_ID === districtID ? 0.5 : (d.properties.PARTY === "R" ? 1 : 0)
+    );
     console.log("New Z values:", newZValues);
-    Plotly.restyle("plotly-map", {
-        z: [newZValues],
-    }, [1]);
+    Plotly.restyle("plotly-map", { z: [newZValues] }, [districtTraceIndex]);
+
 
     Plotly.relayout("plotly-map", {
         "geo.center": { lon: lonCenter, lat: latCenter },
@@ -308,10 +290,12 @@ function backToStateView() {
     });
 
     // Restore state trace visibility
-    Plotly.restyle("plotly-map", { visible: true }, [0]);
+    Plotly.restyle("plotly-map", { visible: true });
 
     let originalValues = stateDistricts.map(d => d.properties.PARTY === "R" ? 1 : 0);
-    Plotly.restyle("plotly-map", { z: [originalValues] }, [1]);
+    let plotData = document.getElementById("plotly-map").data;
+    let districtTraceIndex = plotData.findIndex(trace => trace.featureidkey === "properties.OFFICE_ID");
+    Plotly.restyle("plotly-map", { z: [originalValues] }, [districtTraceIndex]);
     
 
     currentViewLevel = "state";
