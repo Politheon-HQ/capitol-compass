@@ -8,18 +8,18 @@ let allDistricts = null;  // Store full districts data in memory
 let cachedDistricts = {};  // Cache for district data by state
 let stateDistricts = [];  // Store districts of the currently selected state
 
-
-// Load GeoJSON data from API
+// Load simplified TopoJSON data from API (exported as .json)
 Promise.all([
-    fetch("/static/data/us_states.topojson").then(response => response.json()),
-    fetch("/static/data/congressional_districts.topojson").then(response => response.json())
+    fetch("/static/data/us_states.json").then(response => response.json()),
+    fetch("/static/data/congressional_districts.json").then(response => response.json())
 ]).then(([loadedStates, loadedDistricts]) => {
-    states = topojson.feature(loadedStates, loadedStates.objects.us_states);;
-    allDistricts = topojson.feature(loadedDistricts, loadedDistricts.objects.congressional_districts);  // Convert TopoJSON to GeoJSON
-    console.log("Loaded states and districts:", states, allDistricts);
+    // Convert TopoJSON to GeoJSON using the expected object names
+    states = topojson.feature(loadedStates, loadedStates.objects.us_states);
+    allDistricts = topojson.feature(loadedDistricts, loadedDistricts.objects.congressional_districts);
+    console.log("Loaded simplified states and districts:", states, allDistricts);
     initPlotlyMap();
 }).catch(error => {
-    console.error("Error loading GeoJSON:", error);
+    console.error("Error loading simplified GeoJSON:", error);
 });
 
 // Initialize Plotly map
@@ -56,7 +56,7 @@ function initPlotlyMap() {
         plot_bgcolor: "rgba(244,244,244,1)",
     };
 
-    console.log("Rendering state mep with:", stateTrace);
+    console.log("Rendering state map with:", stateTrace);
 
     Plotly.newPlot("plotly-map", [stateTrace], layout, {
         responsive: true,
@@ -102,7 +102,7 @@ function updateDistricts(districts) {
         featureidkey: "properties.OFFICE_ID",
         colorscale: [
             [0, "rgba(247, 23, 19, 0.8)"],
-            [0.5, "yellow"], 
+            [0.5, "yellow"],
             [1, "rgba(51, 7, 246, 0.93)"],
         ],
         autocolorcale: false,
@@ -163,8 +163,8 @@ function stateClicked(stateID) {
     let newLonCenter = (adjMinLon + adjMaxLon) / 2;
     let newLatCenter = (adjMinLat + adjMaxLat) / 2;
     let optimalScale = calculateZoom(adjMinLon, adjMaxLon, adjMinLat, adjMaxLat);
-    
-    // Switch to 'Members' tab
+
+    // Switch to 'Members' tab (assuming loadTab is defined)
     loadTab("members");
 
     Plotly.relayout("plotly-map", {
@@ -182,10 +182,10 @@ function stateClicked(stateID) {
     updateMemberProfile(stateName);
     console.log("Calling updateMemberProfile for:", stateName);
 
-   // Load members and radar chart data (if selected)
-   if (document.querySelector(`[onclick="loadTab('radar-chart')"].active`)) {
+    // Load members and radar chart data (if selected)
+    if (document.querySelector(`[onclick="loadTab('radar-chart')"].active`)) {
         updateRadarChart(window.selectedMemberID);
-    }   
+    }
 }
 
 // Function to zoom into a district
@@ -222,19 +222,18 @@ function districtClicked(districtID) {
     console.log("New Z values:", newZValues);
     Plotly.restyle("plotly-map", { z: [newZValues] }, [districtTraceIndex]);
 
-
     Plotly.relayout("plotly-map", {
         "geo.center": { lon: lonCenter, lat: latCenter },
         "geo.projection.scale": optimalScale
     });
-    
+
     currentViewLevel = "district";
     lastSelectedDistrict = districtID;
     updateButtonVisibility(false, true);
 
     // Load members and radar chart data (if selected)
     if (document.querySelector(`[onclick="loadTab('members')"].active`)) {
-        console.log("Calling updatateMemberProfile for district:", stateAbbr, lastSelectedDistrict.slice(-2));
+        console.log("Calling updateMemberProfile for district:", stateAbbr, lastSelectedDistrict.slice(-2));
         updateMemberProfile(lastSelectedState, lastSelectedDistrict.slice(-2));
     }
     if (document.querySelector(`[onclick="loadTab('radar-chart')"].active`)) {
@@ -268,7 +267,6 @@ function resetView() {
         sidebarContent.innerHTML = "";
         sidebarContent.classList.remove("has-content");
     }
-
 }
 
 // Function to go back to state view
@@ -280,7 +278,6 @@ function backToStateView() {
     let { minLon, maxLon, minLat, maxLat } = getGeoBounds(stateFeature.geometry);
     let center = [(minLon + maxLon) / 2, (minLat + maxLat) / 2];
     let optimalScale = calculateZoom(minLon, maxLon, minLat, maxLat);
-
 
     Plotly.relayout("plotly-map", {
         "geo.center.lon": center[0],
@@ -295,7 +292,6 @@ function backToStateView() {
     let plotData = document.getElementById("plotly-map").data;
     let districtTraceIndex = plotData.findIndex(trace => trace.featureidkey === "properties.OFFICE_ID");
     Plotly.restyle("plotly-map", { z: [originalValues] }, [districtTraceIndex]);
-    
 
     currentViewLevel = "state";
     lastSelectedDistrict = null;
