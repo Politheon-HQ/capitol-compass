@@ -104,12 +104,12 @@ DATABASES = {
 }
 
 # Add SSL Configuration
-DATABASES["default"]["OPTIONS"] = {
-    "ssl": {"ca": ca_cert_path}
-} if ca_cert_path else {}
-
 if "OPTIONS" in DATABASES["default"]:
     DATABASES["default"]["OPTIONS"].pop("sslmode", None)  # Remove sslmode if it exists
+
+if ca_cert_path:
+    DATABASES["default"].setdefault("OPTIONS", {})["ssl"] = {"ca": ca_cert_path}
+
 
 
 #DATABASES = {
