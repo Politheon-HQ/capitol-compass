@@ -1,6 +1,6 @@
 # Ignore Conda environment
 conda/
-env/
+
 
 # Ignore macOS system files
 .DS_Store
@@ -23,9 +23,10 @@ logs/
 venv/
 env/
 *.venv
+.env
 
 # Ignore LFS cache files
 .lfsconfigca-certificate.crt
 
 # Ignore Certificate
-/gallop_project/ca-certificate.crt
+ca-certificate.crt

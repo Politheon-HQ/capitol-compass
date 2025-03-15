@@ -81,11 +81,16 @@ WSGI_APPLICATION = "gallop_project.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": "defaultdb",
-        "USER": "hbodnar",
-        "PASSWORD": "AVNS_Psa3QrCKDVtk_3Dr8cK",
-        "HOST": "db-mysql-nyc3-gallop-do-user-19523898-0.j.db.ondigitalocean.com",
-        "PORT": "25060"
+        "NAME": os.getenv("DB_NAME"),
+        "USER": os.getenv("DB_USER"),
+        "PASSWORD": os.getenv("DB_PASSWORD"),
+        "HOST": os.getenv("DB_HOST"),
+        "PORT": os.getenv("DB_PORT"),
+        "OPTIONS": {
+            "ssl": {
+                "ca": os.getenv("DB_SSL_CA"),
+            }
+        }
     }
 }
 
