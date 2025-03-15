@@ -26,3 +26,6 @@ env/
 
 # Ignore LFS cache files
 .lfsconfigca-certificate.crt
+
+# Ignore Certificate
+/gallop_project/ca-certificate.crt

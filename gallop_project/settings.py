@@ -85,12 +85,7 @@ DATABASES = {
         "USER": "hbodnar",
         "PASSWORD": "AVNS_Psa3QrCKDVtk_3Dr8cK",
         "HOST": "db-mysql-nyc3-gallop-do-user-19523898-0.j.db.ondigitalocean.com",
-        "PORT": "25060",
-        "OPTIONS": {
-            "ssl": {
-                "ssl": {'ca': os.path.join(BASE_DIR, 'ca-certificate.crt')}
-            },
-        },
+        "PORT": "25060"
     }
 }
 
