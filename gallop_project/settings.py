@@ -14,6 +14,7 @@ from pathlib import Path
 import os
 import django_heroku
 import dj_database_url
+import base64
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -81,6 +82,16 @@ WSGI_APPLICATION = "gallop_project.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# Decode the CA Certificate
+DB_CA_CERT = os.getenv("DB_SSL_CA")
+if DB_CA_CERT:
+    ca_cert_path = "/tmp/ca-certificate.crt"
+    with open(ca_cert_path, "wb") as f:
+        f.write(base64.b64decode(DB_CA_CERT))
+else:
+    ca_cert_path = None
+
+# Configure Database
 DATABASES = {
     "default": dj_database_url.config(
         default=os.environ.get("DATABASE_URL"), 
@@ -92,6 +103,14 @@ DATABASES = {
         }
     )
 }
+
+# Add SSL Configuration
+if ca_cert_path:
+    DATABASES["default"]["OPTIONS"] = {
+        "ssl": {
+            "ca": ca_cert_path,
+        }
+    }
 
 #DATABASES = {
 #   "default": {
