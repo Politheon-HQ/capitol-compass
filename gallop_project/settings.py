@@ -92,8 +92,8 @@ DATABASES = {
 }
 
 DATABASES["default"].setdefault("OPTIONS", {})
-if "sslmode" in DATABASES["default"]["OPTIONS"]:
-    del DATABASES["default"]["OPTIONS"]["sslmode"]  # Remove sslmode if it exists
+DATABASES["default"]["OPTIONS"].pop("sslmode", None)  # Remove sslmode if it exists
+
 
 DB_CA_CERT = os.getenv("DB_SSL_CA")
 if DB_CA_CERT:
