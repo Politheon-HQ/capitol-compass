@@ -25,10 +25,10 @@ cd gallop_app
 - pip install -r requirements.txt
 - *(Or use environment.ylm [Mac] or environment_2.yml [Windows])*
 
-4. Run Migrations  
+3. Run Migrations  
 python manage.py migrate  
 
-5. Start the Development Server  
+4. Start the Development Server  
 python manage.py runserver  
 
 ## 📊 Features  
