@@ -1,42 +1,63 @@
 // Global variable to store ideology data
 window.ideologyData = [];
 window.ideologyTopics = [];
+const CACHE_KEY = "ideology_cache";
+const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
-// Function to load ideology chart data
-async function loadIdeologyData() {
-    return fetch("/static/data/combined_data.csv")
-        .then(response => response.text())
-        .then(csv => {
-            let data = Papa.parse(csv, { header: true }).data;
-            console.log("Loaded ideology data:", data);
+// Function to fetch data from API with caching
+async function fetchIdeologyData() {
+    const cachedData = localStorage.getItem(CACHE_KEY);
+    const cachedTime = localStorage.getItem(`${CACHE_KEY}_time`);
+
+    if (cachedData && cachedTime) {
+        const now = new Date().getTime();
+        if (now - cachedTime < CACHE_EXPIRY) {
+            console.log("Using cached ideology data.");
+            const parsedData = JSON.parse(cachedData);
+            window.ideologyData = parsedData.data;
+            window.ideologyTopics = parsedData.topics;
+            return parsedData;
+        }
+    }
+
+    console.log("Fetching new ideology data from API...");
+    return fetch("/api/combined_data/")
+        .then(response => response.json())
+        .then(data => {
+            console.log("Fetched API data:", data);
 
             // Extract unique topics
-            let topics =  new Set();
+            let topics = new Set();
             data.forEach(d => {
                 if (d.assigned_label) {
                     try {
-                        let labels = JSON.parse(d.assigned_label.replace(/'/g, '"'));
+                        let labels = JSON.parse(d.assigned_label);
                         if (Array.isArray(labels)) {
                             labels.forEach(topic => topics.add(topic));
                         }
                     } catch (error) {
-                        console.error("Error parsing assigned_label:", error, "Raw value:", d.assigned_label);
+                        console.error("Error parsing assigned_label:", error, "Raw value:", d.assigned_label);  
                     }
                 }
             });
-            
+
             console.log("Extracted topics:", [...topics]);
 
             // Store data globally
             window.ideologyData = data;
             window.ideologyTopics = [...topics];
 
-            return { ideologyData, ideologyTopics };
+            // Cache data in localStorage
+            localStorage.setItem(CACHE_KEY, JSON.stringify({ data: data, topics: [...topics] }));
+            localStorage.setItem(`${CACHE_KEY}_time`, new Date().getTime());
+
+            return { ideologyData: data, ideologyTopics: [...topics] };
         })
-        .catch(error => console.error("Error loading ideology data:", error));
+        .catch(error => console.error("Error fetching ideology data:", error));
 }
 
-function loadIdeologyChart() {
+// Function to load ideology data and initialize chart
+async function loadIdeologyChart() {
     let chartContainer = document.getElementById("ideology-chart-container");
     let topicSelect = document.getElementById("topic-select");
 
@@ -45,13 +66,16 @@ function loadIdeologyChart() {
         return;
     }
 
+    // Ensure data is loaded
+    await ensureIdeologyDataLoaded();
+
     // Ensure dropdown populated
     populateTopicDropdown(window.ideologyTopics);
 
     // Add event listener to update chart on selection
     topicSelect.addEventListener("change", function() {
         let selectedTopic = this.value;
-        console.log("Selected topic:", this.value);
+        console.log("Selected topic:", selectedTopic);
 
         if (!selectedTopic) {
             // Clear chart if no topic selected
@@ -71,6 +95,7 @@ function loadIdeologyChart() {
     updateIdeologyChart([], "Select a Topic to Display Data", true);
 }
 
+// Function to populate topic dropdown
 function populateTopicDropdown(topics) {
     console.log("Populating topic dropdown with:", topics);
 
@@ -97,7 +122,7 @@ function getDataForTopic(data, topic) {
 
     let counts = data.reduce((acc, d) => {
         try {
-            let topics = JSON.parse(d.assigned_label.replace(/'/g, '"'));
+            let topics = JSON.parse(d.assigned_label);
             if (Array.isArray(topics) && topics.includes(topic)) {
                 acc[d.state] = (acc[d.state] || 0) + 1;
             }
@@ -159,6 +184,6 @@ function updateIdeologyChart(data, isInitialLoad = false) {
 async function ensureIdeologyDataLoaded() {
     if (!window.ideologyData || window.ideologyData.length === 0) {
         console.warn("Ideology data not loaded. Fetching data...");
-        await loadIdeologyData();
+        await fetchIdeologyData();
     }
 }

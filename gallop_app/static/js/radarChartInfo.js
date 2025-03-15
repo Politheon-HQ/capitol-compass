@@ -1,6 +1,41 @@
 
 // Global variable to store congress members data
 window.congressMembersData = [];
+const cacheKey = "radar_chart_cache";
+const cacheExpiry = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+// Function to fetch data from API with caching
+async function fetchRadarData() {
+    const cachedData = localStorage.getItem(cacheKey);
+    const cachedTime = localStorage.getItem(`${cacheKey}_time`);
+
+    // Check if cached data is still valid
+    if (cachedData && cachedTime) {
+        const now = new Date().getTime();
+        if (now - cachedTime < cacheExpiry) {
+            console.log("Using cached radar data.");
+            return JSON.parse(cachedData);
+        }
+    }
+
+    try {
+        console.log("Fetching new radar data from API...");
+        const response = await fetch("/api/member_proportions/");
+        if (!response.ok) throw new Error("Failed to fetch radar chart data.");
+
+        const data = await response.json();
+        window.congressMembersData = data;
+
+        // Store the data in localStorage
+        localStorage.setItem(cacheKey, JSON.stringify(data));
+        localStorage.setItem(`${cacheKey}_time`, Date.now());
+
+        return data;
+    } catch (error) {
+        console.error("Error fetching radar data:", error);
+        return null;
+    }
+}
 
 // Function to get data for radar chart
 function getRadarData(member) {
@@ -80,8 +115,8 @@ function getRadarData(member) {
         },
         {
             display: "Science, Technology and Communications",
-            member_self: "Science__Technology__and_Communications_self_proportion", // Note double underscores
-            member_across_all: "Science__Technology__and_Communications_across_all_proportion",
+            member_self: "Science_Technology_and_Communications_self_proportion", // Note double underscores
+            member_across_all: "Science_Technology_and_Communications_across_all_proportion",
             state_self: "Science_Technology_And_Communications_state_self_proportion",
             state_national: "Science_Technology_And_Communications_state_national_proportion" // Corrected mapping
         },
@@ -172,33 +207,13 @@ function updateRadarChart(bioguideId) {
     });
 }
 
-// Function to load radar chart data from CSV
-async function loadRadarChartData() {
-    console.log("Loading radar chart data...");
-
-    Papa.parse("/static/data/congress_members_with_proportions.csv", {
-        download: true,
-        header: true,
-        skipEmptyLines: true,
-        complete: function(results) {
-            console.log("Radar chart data loaded:", results.data);
-            window.congressMembersData = results.data;
-        },
-        error: function(error) {
-            console.error("Error loading radar chart data:", error);
-        }
-    });
-}
-
 // Function to initialize proportion toggles
 function initProportionToggles() {
-    document.querySelectorAll('input[name="proportion-toggle"]').forEach(input => {
-        input.addEventListener('change', function() {
+    document.addEventListener("change", (event) => {
+        if (event.target.matches('input[name="proportion-toggle"]')) {
             let selectedMember = window.selectedMemberID;
-            if (selectedMember) {
-                updateRadarChart(selectedMember);
-            }
-        });
+            if (selectedMember) updateRadarChart(selectedMember);
+        }
     });
 }
 
@@ -226,12 +241,12 @@ function initRadarDropdown(members) {
 async function ensureRadarDataLoaded() {
     if (!window.congressMembersData || window.congressMembersData.length === 0) {
         console.warn("Radar chart data not loaded. Fetching data...");
-        await loadRadarChartData();
+        await fetchRadarData();
     }
 }
 
 // Event listener to load radar chart data on page load
 document.addEventListener('DOMContentLoaded', async function() {
-    await loadRadarChartData();
+    await fetchRadarData();
     initProportionToggles();
 });

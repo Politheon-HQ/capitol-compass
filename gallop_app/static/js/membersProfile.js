@@ -2,27 +2,44 @@
 let membersData = [];
 window.previousMemberList = [];
 
-// Function to load Congress members from a local CSV file
-async function loadCongressMembers() {
-    try {
-        const response = await fetch("/static/data/cleaned_congress_members.csv");
+const cacheKeyMembers = "congress_members_cache";
+const cacheExpiryMembers = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
-        if (!response.ok) {
-            throw new Error("CSV file not found");
+// Function to fetch Congress members from API with caching
+async function fetchCongressMembers() {
+    const cachedMembers = localStorage.getItem(cacheKeyMembers);
+    const cachedTime = localStorage.getItem(`${cacheKeyMembers}_time`);
+
+    // Check if cached data is still valid
+    if (cachedMembers && cachedTime) {
+        const now = new Date().getTime();
+        if (now - cachedTime < cacheExpiryMembers) {
+            console.log("Using cached Congress members data.");
+            membersData = JSON.parse(cachedMembers);
+            window.membersData = membersData; // Store globally for other functions
+            return membersData;
         }
+    }
 
-        const csvText = await response.text();
-        membersData = Papa.parse(csvText, { header: true }).data;
-        window.membersData = membersData; // Store globally for other functions
-        console.log("Loaded Congress members data:", membersData);
-        console.log("Members available:", window.membersData.length);
-        return membersData;
+    try {
+        console.log("Fetching new Congress members data from API...");
+        const response = await fetch("/api/congress_members/");
+        if (!response.ok) throw new Error("Failed to fetch Congress members data");
+
+        const data = await response.json();
+        window.membersData = data; 
+
+        localStorage.setItem(cacheKeyMembers, JSON.stringify(data));
+        localStorage.setItem(`${cacheKeyMembers}_time`, new Date().getTime());
+
+        return data;
     } catch (error) {
-        console.error("Error loading Congress members data:", error);
-        window.membersData = []; // Ensure global variable is set to empty on error
+        console.error("Error fetching Congress members data:", error);
+        window.membersData = []; 
         return [];
     }
 }
+
 
 // Function to update members based on state selection
 async function updateMemberProfile(stateID, districtNumber = null) {
@@ -95,7 +112,7 @@ function renderMemberList(members) {
 
         // Member Image
         const img = document.createElement("img");
-        img.src = member.imageUrl;
+        img.src = member.image_url;
         img.alt = member.name;
         img.classList.add("profile-image");
 
@@ -108,12 +125,12 @@ function renderMemberList(members) {
         leftColumn.classList.add("left-column");
         leftColumn.innerHTML = `
             <span><strong>Name:</strong> ${member.name}</span><br>
-            <span><strong>Party:</strong> ${member.partyName}</span><br>
+            <span><strong>Party:</strong> ${member.party}</span><br>
             <span><strong>Chamber:</strong> ${member.chamber}</span><br>
             ${districtDisplay}
-            <span><strong>Active:</strong> ${member.startYear} - Present</span><br>
-            <span><strong>Bills Sponsored:</strong> ${member.sponsoredLegislation}</span><br>
-            <span><strong>Bills Co-sponsored:</strong> ${member.cosponsoredLegislation}</span><br>
+            <span><strong>Active:</strong> ${member.start_year} - Present</span><br>
+            <span><strong>Bills Sponsored:</strong> ${member.sponsored_bills}</span><br>
+            <span><strong>Bills Co-sponsored:</strong> ${member.cosponsored_bills}</span><br>
         `;
 
         // Right Column (Contact Details)
@@ -121,8 +138,8 @@ function renderMemberList(members) {
         rightColumn.classList.add("right-column");
         rightColumn.innerHTML = `
             <span><strong>Address:</strong> ${member.address}</span><br>
-            <span><strong>Phone:</strong> ${member.phoneNumber}</span><br>
-            <span><strong>Website:</strong> <a href="${member.websiteURL}" target="_blank">${member.websiteURL}</a></span><br>
+            <span><strong>Phone:</strong> ${member.phone_number}</span><br>
+            <span><strong>Website:</strong> <a href="${member.website_url}" target="_blank">${member.websiteURL}</a></span><br>
         `;
 
         // Click event to open Radar Chart
@@ -149,7 +166,7 @@ function renderMemberList(members) {
 async function ensureCongressMembersLoaded() {
     if (!window.membersData || window.membersData.length === 0) {
         console.warn("Congress members not loaded. Fetching data...");
-        await loadCongressMembers();
+        await fetchCongressMembers();
     }
 }
 

@@ -8,19 +8,65 @@ let allDistricts = null;  // Store full districts data in memory
 let cachedDistricts = {};  // Cache for district data by state
 let stateDistricts = [];  // Store districts of the currently selected state
 
-// Load simplified TopoJSON data from API (exported as .json)
-Promise.all([
-    fetch("/static/data/us_states.json").then(response => response.json()),
-    fetch("/static/data/congressional_districts.json").then(response => response.json())
-]).then(([loadedStates, loadedDistricts]) => {
-    // Convert TopoJSON to GeoJSON using the expected object names
-    states = topojson.feature(loadedStates, loadedStates.objects.us_states);
-    allDistricts = topojson.feature(loadedDistricts, loadedDistricts.objects.congressional_districts);
-    console.log("Loaded simplified states and districts:", states, allDistricts);
-    initPlotlyMap();
-}).catch(error => {
-    console.error("Error loading simplified GeoJSON:", error);
-});
+// Cache keys and expiry time (24 hours)
+const CACHE_KEYS = {
+    STATES: "us_states_cache",
+    DISTRICTS: "congressional_districts_cache"
+};
+const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+// Fetch data from API with caching
+async function fetchGeoData(cachekey, api_url) {
+    const cachedData = localStorage.getItem(cachekey);
+    const cachedTime = localStorage.getItem(`${cachekey}_time`);
+
+    if (cachedData && cachedTime) {
+        const now = new DataTransfer().getTime();
+        if (now - cachedTime < CACHE_EXPIRY) {
+            console.log("Using cached data for ${cachekey}.");
+            return JSON.parse(cachedData);
+        }
+    }
+
+    try {
+        console.log(`Fetching new data for ${cachekey} from API...`);
+        const response = await fetch(api_url);
+        if (!response.ok) throw new Error(`Failed to fetch ${cachekey} data`);
+        const data = await response.json();
+
+        localStorage.setItem(cachekey, JSON.stringify(data));
+        localStorage.setItem(`${cachekey}_time`, new Date.now());
+
+        return data;
+    } catch (error) {
+        console.error(`Error fetching ${cachekey} data:`, error);
+        return null;
+    }
+}
+
+// Load US states and congressional districts
+async function loadMapData() {
+    try {
+        const [loadedStates, loadedDistricts] = await Promise.all([
+            fetchGeoData(CACHE_KEYS.STATES, "/api/us_states/"),
+            fetchGeoData(CACHE_KEYS.DISTRICTS, "/api/congressional_districts/")
+        ]);
+
+        if (!loadedStates || !loadedDistricts) {
+            console.error("Failed to load data for states or districts.");
+            return;
+        }
+
+        // Convert JSON to GeoJSON
+        states = topojson.feature(loadedStates, loadedStates.objects.us_states);
+        allDistricts = topojson.feature(loadedDistricts, loadedDistricts.objects.congressional_districts);
+
+        console.log("Loaded states and districts:", states, allDistricts);
+        initPlotlyMap();
+    } catch (error) {
+        console.error("Error loading map data:", error);
+    }
+}
 
 // Initialize Plotly map
 function initPlotlyMap() {
@@ -351,3 +397,5 @@ function updateButtonVisibility(showBackToNational, showBackToState) {
     document.getElementById("backToNationalView").style.display = showBackToNational ? "block" : "none";
     document.getElementById("backToStateView").style.display = showBackToState ? "block" : "none";
 }
+
+document.addEventListener("DOMContentLoaded", loadMapData);
