@@ -138,10 +138,6 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 
-# Only set STATICFILES_DIRS for local development
-if os.getenv("DJANGO_DEVELOPMENT") == "True":
-    STATICFILES_DIRS = [os.path.join(BASE_DIR, 'gallop_app/static')]
-
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
