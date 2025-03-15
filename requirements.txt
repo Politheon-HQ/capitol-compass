@@ -1,5 +1,4 @@
 asgiref==3.8.1
-Bottleneck @ file:///Users/runner/miniforge3/conda-bld/bottleneck_1729268910090/work
 certifi @ file:///home/conda/feedstock_root/build_artifacts/certifi_1739515848642/work/certifi
 dj-database-url==2.3.0
 Django==5.1.5
