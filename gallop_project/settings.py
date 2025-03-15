@@ -95,7 +95,7 @@ else:
     ca_cert_path = None
 
 # Configure Database
-database_url = os.getenv("DATABASE_URL").replace("?ssl-mode=REQUIRED", "")
+database_url = os.getenv("DATABASE_URL").split("?")[0]
 DATABASES = {
     "default": dj_database_url.config(
         default=database_url, 
@@ -104,10 +104,13 @@ DATABASES = {
 }
 
 # Add SSL Configuration
-if ca_cert_path:
-    DATABASES["default"]["OPTIONS"] = {
-        "ssl": {"ca": ca_cert_path}
-    }
+DATABASES["default"]["OPTIONS"] = {
+    "ssl": {"ca": ca_cert_path}
+} if ca_cert_path else {}
+
+if "OPTIONS" in DATABASES["default"]:
+    DATABASES["default"]["OPTIONS"].pop("sslmode", None)  # Remove sslmode if it exists
+
 
 #DATABASES = {
 #   "default": {
