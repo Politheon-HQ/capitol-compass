@@ -25,4 +25,4 @@ env/
 *.venv
 
 # Ignore LFS cache files
-.lfsconfig
+.lfsconfigca-certificate.crt
