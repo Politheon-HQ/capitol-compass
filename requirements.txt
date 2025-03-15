@@ -1,15 +1,26 @@
 asgiref==3.8.1
-Bottleneck @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_55txi4fy1u/croot/bottleneck_1731058642212/work
+Bottleneck @ file:///Users/runner/miniforge3/conda-bld/bottleneck_1729268910090/work
+certifi @ file:///home/conda/feedstock_root/build_artifacts/certifi_1739515848642/work/certifi
+dj-database-url==2.3.0
 Django==5.1.5
+django-heroku==0.3.1
+djangorestframework==3.15.2
 GDAL @ file:///Users/runner/miniforge3/conda-bld/libgdal-core_1737608412298/work/build/swig/python
+git-filter-repo==2.47.0
+gunicorn==23.0.0
 mysql-connector-python==9.2.0
-numexpr @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/numexpr_1731706619640/work
+numexpr @ file:///Users/runner/miniforge3/conda-bld/numexpr_1729662250754/work
 numpy @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_245oeom5c7/croot/numpy_and_numpy_base_1736500455775/work/dist/numpy-2.2.1-cp313-cp313-macosx_11_0_arm64.whl#sha256=3856b7fe44e0c3c307fc72c7c455fea30d08adb30e3f4c853450e58171b3d596
-pandas @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_4aifrweohv/croot/pandas_1732735109535/work/dist/pandas-2.2.3-cp313-cp313-macosx_11_0_arm64.whl#sha256=8f01410ead9f51bf614097bf4230440a4461983f8acb57141e819b93d81e26d6
+packaging==24.2
+pandas @ file:///Users/runner/miniforge3/conda-bld/pandas_1726878437586/work
+psycopg2==2.9.10
+PyMySQL==1.1.1
 python-dateutil @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/python-dateutil_1728585579455/work
-pytz @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/pytz_1728586101417/work
+pytz @ file:///home/conda/feedstock_root/build_artifacts/pytz_1706886791323/work
 setuptools==72.1.0
-six @ file:///tmp/build/80754af9/six_1644875935023/work
+six @ file:///home/conda/feedstock_root/build_artifacts/six_1733216807016/work
 sqlparse==0.5.3
-tzdata @ file:///croot/python-tzdata_1690578112552/work
+typing_extensions==4.12.2
+tzdata @ file:///home/conda/feedstock_root/build_artifacts/python-tzdata_1680081134351/work
 wheel==0.44.0
+whitenoise==6.9.0
