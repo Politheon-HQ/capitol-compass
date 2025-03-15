@@ -27,7 +27,7 @@ jobs:
     - name: Authenticate with Heroku
       env:
         HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-      run: heroku auth:token
+      run: heroku auth:whoami
 
     - name: Set Heroku Git Remote            
       env:
@@ -39,18 +39,31 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Decode CA Certificate
+      env:
+        CA_CERTIFICATE: ${{ secrets.CA_CERTIFICATE }}
+      run: |
+        echo "$CA_CERTIFICATE" | base64 --decode > ca-certificate.crt
+        ls -l ca-certificate.crt    
+
     - name: Run tests
       run: |
         python manage.py test
 
     - name: Collect static files
-      run: pythin manage.py collectstatic --noinput    
+      run: python manage.py collectstatic --noinput    
+
+    - name: Ensure Heroku Buildpacks are Set
+      run: |
+        heroku buildpacks:set heroku/python
+        heroku stack:set heroku-24   
 
     - name: Push to Heroku
       env:
         HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
       run: |
         git push heroku main
+        heroku config:set DB_SSL_CA=/app/ca-certificate.crt --app gallop
 
     - name: Run database migrations
       run: heroku run python manage.py migrate --app gallop    
