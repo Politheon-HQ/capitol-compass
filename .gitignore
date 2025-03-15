@@ -35,3 +35,4 @@ env/
 # Ignore Certificate
 ca-certificate.crt
 ca-cert.b64
+gallop_app/static/data/
