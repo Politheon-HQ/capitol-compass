@@ -1,6 +1,6 @@
 # gallop-app
 
-- Repo for Gallop MVP (Map, Plots, Metrics, Ect.)
+## Repo for Gallop MVP (Map, Plots, Metrics, Ect.)
 
 - Framework in Django
 - Database is on Digital Ocean (digitalocean.com)
