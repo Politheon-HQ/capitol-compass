@@ -28,5 +28,9 @@ env/
 # Ignore LFS cache files
 .lfsconfigca-certificate.crt
 
+# Ignore large files
+*.csv
+*.geojson
+
 # Ignore Certificate
 ca-certificate.crt
