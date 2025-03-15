@@ -8,6 +8,22 @@
     <!-- Link External CSS -->
      <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 
+
+    <!-- D3 Section -->     
+
+    <!-- Include D3 (version 6 or 7) -->
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+
+
+    <!-- Original D3 RadarChart.js -->
+    <script src="{% static 'js/radarChart.js' %}"></script>
+
+    <!-- Separate JS file that loads CSV & calls RadarChart -->
+    <script src="{% static 'js/radarChartD3Implementation.js' %}"></script>
+
+    <!-- ////////////////////// -->
+
+
     <!-- Include Plotly.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
@@ -17,7 +33,7 @@
     <script src="{% static 'js/membersProfile.js' %}"></script>
     <script src="{% static 'js/congress_map.js' %}"></script>
     <script src="{% static 'js/radarChart.js' %}"></script>
-    <script src="{% static 'js/radarChartInfo.js' %}"></script>
+
     <script src="{% static 'js/ideologyChart.js' %}"></script>
     <script src="{% static 'js/tabs.js' %}"></script>
 </head>
@@ -97,33 +113,31 @@
                 </div>
                 
 
-                <!-- Radar Chart Container -->
+                <!-- Radar Chart Tab Content -->
                 <div id="radar-chart-container" class="tab-container" style="display: none;">
-                    <h2 id="radar-chart-title">Congress Members Radar Chart</h2>
+                <h2 id="radar-chart-title">Congress Members Radar Chart (D3)</h2>
+                
+                <!-- Controls (e.g., dropdown, proportion toggle) -->
+                <div id="radar-controls">
+                    <label for="radar-member-select">Select a Member:</label>
+                    <select id="radar-member-select">
+                    <option value="">-- Select a Member --</option>
+                    </select>
 
-                    <!-- Radar Chart Controls -->
-                    <div id="controls">
-                        <!-- Member Selection Dropdown -->
-                         <label for="radar-member-select">Select a Member:</label>
-                         <select id="radar-member-select">
-                            <option value="">-- Select a Member --</option>
-                         </select>
-
-                        <!-- Toggle for Self Proportion vs Across All Proportion -->
-                        <div class="toggle-controls">
-                            <label>
-                                <input type="radio" name="proportion-toggle" value="self" checked>
-                                Self Proportion
-                            </label>
-                            <label>
-                                <input type="radio" name="proportion-toggle" value="across_all">
-                                Across All Proportion
-                            </label>
-                        </div>
+                    <div class="toggle-controls">
+                    <label>
+                        <input type="radio" name="proportion-toggle" value="self" checked>
+                        Self Proportion
+                    </label>
+                    <label>
+                        <input type="radio" name="proportion-toggle" value="across_all">
+                        Across All Proportion
+                    </label>
                     </div>
+                </div>
 
-                    <!-- Radar Chart -->
-                    <div id="radar-chart"></div>
+                <!-- Container where the D3 radar chart will render -->
+                <div id="radar-chart"></div>
                 </div>
 
                 <!-- Ideology Chart Container -->
