@@ -18,20 +18,17 @@ import dj_database_url
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Activate Django-Heroku.
-django_heroku.settings(locals(), staticfiles=False)
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-8@y=ok1!cg*s2@bv4$u6ryt1lmbxabxidte=p$ed-u90y56p1v"
+SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["https://gallop-f748892b3829.herokuapp.com", "localhost", "127.0.0.1"]
 
 
 # Application definition
@@ -84,26 +81,29 @@ WSGI_APPLICATION = "gallop_project.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+DATABASE_URL = os.getenv("DATABASE_URL")
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": os.getenv("DB_NAME"),
-        "USER": os.getenv("DB_USER"),
-        "PASSWORD": os.getenv("DB_PASSWORD"),
-        "HOST": os.getenv("DB_HOST"),
-        "PORT": os.getenv("DB_PORT"),
-        "OPTIONS": {
-            "ssl": {
-                "ca": os.getenv("DB_SSL_CA"),
-            }
-        }
-    }
+    "default": dj_database_url.config(DATABASE_URL, conn_max_age=600, ssl_require=True)
 }
 
+#DATABASES = {
+#   "default": {
+#      "ENGINE": "django.db.backends.mysql",
+#        "NAME": os.getenv("DB_NAME"),
+#        "USER": os.getenv("DB_USER"),
+#        "PASSWORD": os.getenv("DB_PASSWORD"),
+#        "HOST": os.getenv("DB_HOST"),
+#        "PORT": os.getenv("DB_PORT"),
+#        "OPTIONS": {
+#            "ssl": {
+#                "ca": os.getenv("DB_SSL_CA"),
+#            }
+#        }
+#    }
+#}
+
 # Load the database URL from Heroku or environment variables
-DATABASE_URL = os.getenv("DATABASE_URL")
-if DATABASE_URL:
-    DATABASES["default"] = dj_database_url.parse(default=DATABASE_URL, conn_max_age=600, ssl_require=True)
+
 
 
 # Password validation
@@ -141,10 +141,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = "/static/"
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'gallop_app/static')]
+#STATICFILES_DIRS = [os.path.join(BASE_DIR, 'gallop_app/static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Activate Django-Heroku.
+django_heroku.settings(locals())

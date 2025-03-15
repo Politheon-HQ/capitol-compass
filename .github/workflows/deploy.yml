@@ -16,7 +16,23 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.11'
+        python-version: '3.13'
+
+    - name: Ensure .python-version exists (required by Heroku)
+      run: echo "3.13" > .python-version
+
+    - name: Install Heroku CLI
+      run: curl https://cli-assets.heroku.com/install.sh | sh
+
+    - name: Authenticate with Heroku
+      env:
+        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+      run: heroku auth:token
+
+    - name: Set Heroku Git Remote            
+      env:
+        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+      run: heroku git:remote -a gallop
 
     - name: Install dependencies
       run: |
@@ -27,9 +43,14 @@ jobs:
       run: |
         python manage.py test
 
-    - name: Deploy to Heroku
+    - name: Collect static files
+      run: pythin manage.py collectstatic --noinput    
+
+    - name: Push to Heroku
       env:
         HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
       run: |
-        heroku git:remote -a Gallop
         git push heroku main
+
+    - name: Run database migrations
+      run: heroku run python manage.py migrate --app gallop    
