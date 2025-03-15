@@ -13,7 +13,7 @@ const CACHE_KEYS = {
     STATES: "us_states_cache",
     DISTRICTS: "congressional_districts_cache"
 };
-const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+const CACHE_EXPIRY_MAP = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 // Fetch data from API with caching
 async function fetchGeoData(cachekey, api_url) {
@@ -22,7 +22,7 @@ async function fetchGeoData(cachekey, api_url) {
 
     if (cachedData && cachedTime) {
         const now = new DataTransfer().getTime();
-        if (now - cachedTime < CACHE_EXPIRY) {
+        if (now - cachedTime < CACHE_EXPIRY_MAP) {
             console.log("Using cached data for ${cachekey}.");
             return JSON.parse(cachedData);
         }
