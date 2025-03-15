@@ -1,4 +1,5 @@
 asgiref==3.8.1
+certifi==2025.1.31
 dj-database-url==2.3.0
 Django==5.1.5
 django-heroku==0.3.1
@@ -6,11 +7,9 @@ djangorestframework==3.15.2
 git-filter-repo==2.47.0
 gunicorn==23.0.0
 mysql-connector-python==9.2.0
-numpy @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_245oeom5c7/croot/numpy_and_numpy_base_1736500455775/work/dist/numpy-2.2.1-cp313-cp313-macosx_11_0_arm64.whl#sha256=3856b7fe44e0c3c307fc72c7c455fea30d08adb30e3f4c853450e58171b3d596
 packaging==24.2
 psycopg2==2.9.10
 PyMySQL==1.1.1
-python-dateutil @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/python-dateutil_1728585579455/work
 setuptools==72.1.0
 sqlparse==0.5.3
 typing_extensions==4.12.2
