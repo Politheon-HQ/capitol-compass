@@ -43,8 +43,14 @@ jobs:
       env:
         CA_CERTIFICATE: ${{ secrets.CA_CERTIFICATE }}
       run: |
-        echo "$CA_CERTIFICATE" | base64 --decode > ca-certificate.crt
-        ls -l ca-certificate.crt    
+        echo "$CA_CERTIFICATE" | base64 --decode > /tmp/ca-certificate.crt
+        ls -l /tmp/ca-certificate.crt    
+
+    - name: Set CA Certificate Path in Heroku
+      env:
+        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+      run: |
+        heroku config:set DB_SSL_CA=/tmp/ca-certificate.crt --app gallop    
 
     - name: Run tests
       run: |
@@ -63,7 +69,6 @@ jobs:
         HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
       run: |
         git push heroku main
-        heroku config:set DB_SSL_CA=/app/ca-certificate.crt --app gallop
 
     - name: Run database migrations
       run: heroku run python manage.py migrate --app gallop    
