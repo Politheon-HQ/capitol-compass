@@ -96,11 +96,6 @@ DATABASES = {
     "default": dj_database_url.config(
         default=os.environ.get("DATABASE_URL"), 
         conn_max_age=600,
-        ssl={
-            "ssl": {
-                "ca": os.getenv("DB_SSL_CA"),
-            }
-        }
     )
 }
 
