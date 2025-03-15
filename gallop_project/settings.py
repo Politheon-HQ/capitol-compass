@@ -82,7 +82,17 @@ WSGI_APPLICATION = "gallop_project.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DB_SSL_CA = os.getenv("DB_SSL_CA")
+DB_CA_CERT = os.getenv("DB_SSL_CA")
+if DB_CA_CERT:
+    try:
+        ca_cert_path = "/tmp/ca-certificate.crt"
+        with open(ca_cert_path, "wb") as f:
+            f.write(base64.b64decode(DB_CA_CERT + "==="))
+    except Exception as e:
+        print(f"Error writing CA certificate to file: {e}")
+        ca_cert_path = None
+else:
+    ca_cert_path = None
 
 # Configure Database
 database_url = os.getenv("DATABASE_URL").replace("?ssl-mode=REQUIRED", "")
@@ -94,9 +104,9 @@ DATABASES = {
 }
 
 # Add SSL Configuration
-if DB_SSL_CA:
+if ca_cert_path:
     DATABASES["default"]["OPTIONS"] = {
-        "ssl": {"ca": DB_SSL_CA}
+        "ssl": {"ca": ca_cert_path}
     }
 
 #DATABASES = {
