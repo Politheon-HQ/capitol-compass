@@ -87,7 +87,7 @@ if DB_CA_CERT:
     try:
         ca_cert_path = "/tmp/ca-certificate.crt"
         with open(ca_cert_path, "wb") as f:
-            f.write(base64.b64decode(DB_CA_CERT))
+            f.write(DB_CA_CERT)
     except Exception as e:
         print(f"Error writing CA certificate to file: {e}")
         ca_cert_path = None
