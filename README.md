@@ -1,5 +1,5 @@
 
-# 🚀 Gallop MVP <img src="/readme_images/gallop_icon.jpg" alt="Gallop Logo" width="50" align="right">
+# 🚀 Gallop MVP <img src="/readme_images/gallop_icon.jpg" alt="Gallop Logo" width="100" align="right">
 
 **MVP web app featuring interactive maps, plots, and key metrics**  
 
