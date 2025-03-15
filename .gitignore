@@ -34,3 +34,4 @@ env/
 
 # Ignore Certificate
 ca-certificate.crt
+ca-cert.b64
