@@ -82,8 +82,6 @@ WSGI_APPLICATION = "gallop_project.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DB_CA_CERT = os.getenv("DB_SSL_CA")
-
 # Configure Database
 database_url = os.getenv("DATABASE_URL").split("?")[0]
 DATABASES = {
@@ -93,12 +91,13 @@ DATABASES = {
     )
 }
 
-# Add SSL Configuration
-if "OPTIONS" in DATABASES["default"]:
-    DATABASES["default"]["OPTIONS"].pop("sslmode", None)  # Remove sslmode if it exists
+DATABASES["default"].setdefault("OPTIONS", {})
+if "sslmode" in DATABASES["default"]["OPTIONS"]:
+    del DATABASES["default"]["OPTIONS"]["sslmode"]  # Remove sslmode if it exists
 
+DB_CA_CERT = os.getenv("DB_SSL_CA")
 if DB_CA_CERT:
-    DATABASES["default"].setdefault("OPTIONS", {})["ssl"] = {"ca": DB_CA_CERT}
+    DATABASES["default"]["OPTIONS"]["ssl"] = {"ca": DB_CA_CERT}
 
 
 
