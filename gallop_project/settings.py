@@ -82,40 +82,22 @@ WSGI_APPLICATION = "gallop_project.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# Configure Database
-database_url = os.getenv("DATABASE_URL").split("?")[0]
+
 DATABASES = {
-    "default": dj_database_url.config(
-        default=database_url, 
-        conn_max_age=600,
-    )
+   "default": {
+      "ENGINE": "django.db.backends.mysql",
+        "NAME": os.getenv("DB_NAME"),
+        "USER": os.getenv("DB_USER"),
+        "PASSWORD": os.getenv("DB_PASSWORD"),
+        "HOST": os.getenv("DB_HOST"),
+        "PORT": os.getenv("DB_PORT"),
+        "OPTIONS": {
+            "ssl": {
+                "ca": os.getenv("DB_SSL_CA"),
+            }
+        }
+    }
 }
-
-DATABASES["default"].setdefault("OPTIONS", {})
-DATABASES["default"]["OPTIONS"].pop("sslmode", None)  # Remove sslmode if it exists
-
-
-DB_CA_CERT = os.getenv("DB_SSL_CA")
-if DB_CA_CERT:
-    DATABASES["default"]["OPTIONS"]["ssl"] = {"ca": DB_CA_CERT}
-
-
-
-#DATABASES = {
-#   "default": {
-#      "ENGINE": "django.db.backends.mysql",
-#        "NAME": os.getenv("DB_NAME"),
-#        "USER": os.getenv("DB_USER"),
-#        "PASSWORD": os.getenv("DB_PASSWORD"),
-#        "HOST": os.getenv("DB_HOST"),
-#        "PORT": os.getenv("DB_PORT"),
-#        "OPTIONS": {
-#            "ssl": {
-#                "ca": os.getenv("DB_SSL_CA"),
-#            }
-#        }
-#    }
-#}
 
 # Load the database URL from Heroku or environment variables
 
