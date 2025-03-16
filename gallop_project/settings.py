@@ -110,7 +110,7 @@ DATABASES = {
         "HOST": os.getenv("DB_HOST"),
         "PORT": os.getenv("DB_PORT"),
         "OPTIONS": {
-            "ssl": {"ca": "/mp/tmp1i1wn3of.crt"}
+            "ssl": {"ca": DB_SSL_CA_PATH}
         }
     }
 }

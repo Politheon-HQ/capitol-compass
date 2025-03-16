@@ -44,8 +44,7 @@ jobs:
         HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         CA_CERTIFICATE: ${{ secrets.CA_CERTIFICATE }}
       run: |
-        heroku run --app gallop 'echo "$CA_CERTIFICATE" > /app/gallop_project/ca-certificate.crt'
-        heroku run --app gallop 'cat /app/gallop_project/ca-certificate.crt'    
+        heroku config:set DB_SSL_CA="$CA_CERTIFICATE" --app gallop   
 
     - name: Run tests
       run: |
