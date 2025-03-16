@@ -35,7 +35,7 @@ async function fetchGeoData(cachekey, api_url) {
         const data = await response.json();
 
         localStorage.setItem(cachekey, JSON.stringify(data));
-        localStorage.setItem(`${cachekey}_time`, new Date.now());
+        localStorage.setItem(`${cachekey}_time`, Date.now());
 
         return data;
     } catch (error) {
