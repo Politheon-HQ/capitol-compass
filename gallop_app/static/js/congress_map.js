@@ -1,4 +1,4 @@
-// JavaScript code for interactive map of US Congress members
+// JavaScript code for interactive map of US Congress members //
 
 let currentViewLevel = "national";  // Tracks zoom state: "national", "state", "district"
 let lastSelectedState = null;
