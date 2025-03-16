@@ -48,8 +48,8 @@ async function fetchGeoData(cachekey, api_url) {
 async function loadMapData() {
     try {
         const [loadedStates, loadedDistricts] = await Promise.all([
-            fetchGeoData(CACHE_KEYS.STATES, "/api/us_states/"),
-            fetchGeoData(CACHE_KEYS.DISTRICTS, "/api/congressional_districts/")
+            fetchGeoData(CACHE_KEYS.STATES, "/api/us_states_topojson/"),
+            fetchGeoData(CACHE_KEYS.DISTRICTS, "/api/congressional_districts_topojson/")
         ]);
 
         if (!loadedStates || !loadedDistricts) {
