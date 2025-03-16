@@ -37,7 +37,14 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt    
+        pip install -r requirements.txt   
+        
+    - name: Store CA Certificate in Heroku Config
+      env:
+        HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        CA_CERTIFICATE: ${{ secrets.CA_CERTIFICATE }}
+      run: |
+        heroku config:set DB_SSL_CA="$CA_CERTIFICATE" --app gallop
 
     - name: Run tests
       run: |

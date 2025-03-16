@@ -107,7 +107,7 @@ DATABASES = {
         "HOST": os.getenv("DB_HOST"),
         "PORT": os.getenv("DB_PORT"),
         "OPTIONS": {
-            "ssl": {"ca": "/app/gallop_project/ca-certificates.crt"} 
+            "ssl": {"ca": "/tmp/ca-certificates.crt"} 
         }
     }
 }
