@@ -97,6 +97,7 @@ WSGI_APPLICATION = "gallop_project.wsgi.application"
  #   DB_SSL_CA_PATH = temp_ca_cert.name  # Path to the temp file
 #else:
 #    DB_SSL_CA_PATH = None  # If no cert is found, fallback
+DB_SSL_CA = os.getenv("DB_SSL_CA", "/app/gallop_project/ca-certificate.crt")  # Default path to the CA cert
 
 DATABASES = {
    "default": {
@@ -107,7 +108,7 @@ DATABASES = {
         "HOST": os.getenv("DB_HOST"),
         "PORT": os.getenv("DB_PORT"),
         "OPTIONS": {
-            "ssl": {"ca": os.getenv("DB_SSL_CA", "/tmp/ca-certificate.crt")}
+            "ssl": {"ca": DB_SSL_CA}
         }
     }
 }
