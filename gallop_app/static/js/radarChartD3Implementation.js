@@ -116,15 +116,13 @@ function buildRadarDataset(member, proportionType) {
   const dataset = [[], []]; // [memberData[], stateData[]]
 
   policyAreas.forEach(area => {
-    // Member proportion
     const memField = (proportionType === 'self') ? area.member_self : area.member_across_all;
     let memVal = parseFloat(member[memField]) || 0;
 
-    // State proportion
     const stField = (proportionType === 'self') ? area.state_self : area.state_national;
     let stVal = parseFloat(member[stField]) || 0;
 
-    // If “across_all” proportion, apply scaling for House or Senate
+    // Apply chamber-specific scaling if needed:
     if (proportionType === 'across_all') {
       const scalingFactor = SCALING_FACTORS[member.chamber] || 1;
       memVal *= scalingFactor;
@@ -133,6 +131,10 @@ function buildRadarDataset(member, proportionType) {
     dataset[0].push({ axis: area.display, value: memVal });
     dataset[1].push({ axis: area.display, value: stVal });
   });
+
+  // **Add these lines to assign fixed indices:**
+  dataset[0].index = 0;
+  dataset[1].index = 1;
 
   return dataset;
 }
