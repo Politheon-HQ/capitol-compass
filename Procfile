@@ -1,1 +1,1 @@
-web: gunicorn gallop_project.wsgi --log-file -
+web: ./heroku_startup.sh
