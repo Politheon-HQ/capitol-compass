@@ -88,16 +88,6 @@ WSGI_APPLICATION = "gallop_project.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-
-# Write the CA certificate to a temporary file
-#if DB_SSL_CA_CONTENT:
- #   temp_ca_cert = tempfile.NamedTemporaryFile(delete=False, suffix=".crt", mode='w')
-#    temp_ca_cert.write(DB_SSL_CA_CONTENT)
-#    temp_ca_cert.close()
- #   DB_SSL_CA_PATH = temp_ca_cert.name  # Path to the temp file
-#else:
-#    DB_SSL_CA_PATH = None  # If no cert is found, fallback
-
 DATABASES = {
    "default": {
       "ENGINE": "django.db.backends.mysql",
@@ -111,8 +101,6 @@ DATABASES = {
         }
     }
 }
-
-# Load the database URL from Heroku or environment variables
 
 
 # Password validation
@@ -157,6 +145,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 ## Use WhiteNoise's storage backend that appends a unique hash to filenames,
 ## so browsers always load the updated version when files change.
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+WHITENOISE_KEEP_ONLY_HASHED_FILES = True
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
