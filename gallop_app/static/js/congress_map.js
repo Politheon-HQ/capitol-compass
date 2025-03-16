@@ -1,4 +1,5 @@
 // JavaScript code for interactive map of US Congress members //
+// HEROKU PUSH VERSION //
 
 let currentViewLevel = "national";  // Tracks zoom state: "national", "state", "district"
 let lastSelectedState = null;
