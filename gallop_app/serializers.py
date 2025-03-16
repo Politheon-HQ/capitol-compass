@@ -1,12 +1,16 @@
 import json
 from rest_framework import serializers
-from .models import USState, CongressionalDistrict, CongressMembers, CongressMembersWithProportions, CombinedData
+from .models import USState, CongressionalDistrict, CongressMembers, CongressMembersWithProportions, CombinedData, USStateTopojson
 
 class USStateSerializer(serializers.ModelSerializer):
     class Meta:
         model = USState
         fields = '__all__'
 
+class USStateTopojsonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = USStateTopojson
+        fields = ['id', 'topojson']
 class CongressionalDistrictSerializer(serializers.ModelSerializer):
     class Meta:
         model = CongressionalDistrict

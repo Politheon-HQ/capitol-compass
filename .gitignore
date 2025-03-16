@@ -37,4 +37,4 @@ ca-certificate.crt
 ca-cert.b64
 
 # Ignore data files
-/gallop_app/static/data/
+gallop_app/static/data/

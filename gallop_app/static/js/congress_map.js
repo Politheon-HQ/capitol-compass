@@ -21,9 +21,9 @@ async function fetchGeoData(cachekey, api_url) {
     const cachedTime = localStorage.getItem(`${cachekey}_time`);
 
     if (cachedData && cachedTime) {
-        const now = new DataTransfer().getTime();
-        if (now - cachedTime < CACHE_EXPIRY_MAP) {
-            console.log("Using cached data for ${cachekey}.");
+        const now = Date.now();
+        if (now - Number(cachedTime) < CACHE_EXPIRY_MAP) {
+            console.log(`Using cached data for ${cachekey}.`);
             return JSON.parse(cachedData);
         }
     }
@@ -35,7 +35,7 @@ async function fetchGeoData(cachekey, api_url) {
         const data = await response.json();
 
         localStorage.setItem(cachekey, JSON.stringify(data));
-        localStorage.setItem(`${cachekey}_time`, new Date.now());
+        localStorage.setItem(`${cachekey}_time`, Date.now());
 
         return data;
     } catch (error) {

@@ -11,7 +11,7 @@ async function fetchRadarData() {
 
     // Check if cached data is still valid
     if (cachedData && cachedTime) {
-        const now = new Date().getTime();
+        const now = Date.now();
         if (now - cachedTime < cacheExpiry) {
             console.log("Using cached radar data.");
             return JSON.parse(cachedData);

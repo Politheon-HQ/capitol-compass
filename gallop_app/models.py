@@ -13,6 +13,15 @@ class USState(models.Model):
 
     def __str__(self):
         return self.state_name
+    
+class USStateTopojson(models.Model):
+    topojson = models.JSONField()
+
+    class Meta:
+        db_table = "us_states_topo"
+
+    def __str__(self):
+        return self.id
 
 class CongressionalDistrict(models.Model):
     office_id = models.CharField(max_length=10, primary_key=True)

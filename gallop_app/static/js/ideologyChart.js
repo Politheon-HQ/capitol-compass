@@ -10,7 +10,7 @@ async function fetchIdeologyData() {
     const cachedTime = localStorage.getItem(`${CACHE_KEY}_time`);
 
     if (cachedData && cachedTime) {
-        const now = new Date().getTime();
+        const now = Date.now();
         if (now - cachedTime < CACHE_EXPIRY) {
             console.log("Using cached ideology data.");
             const parsedData = JSON.parse(cachedData);
@@ -49,7 +49,7 @@ async function fetchIdeologyData() {
 
             // Cache data in localStorage
             localStorage.setItem(CACHE_KEY, JSON.stringify({ data: data, topics: [...topics] }));
-            localStorage.setItem(`${CACHE_KEY}_time`, new Date().getTime());
+            localStorage.setItem(`${CACHE_KEY}_time`, Date.now());
 
             return { ideologyData: data, ideologyTopics: [...topics] };
         })
