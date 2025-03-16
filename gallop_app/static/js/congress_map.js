@@ -1,4 +1,5 @@
 // JavaScript code for interactive map of US Congress members //
+// HEROKU PUSH VERSION //
 
 let currentViewLevel = "national";  // Tracks zoom state: "national", "state", "district"
 let lastSelectedState = null;
@@ -35,6 +36,7 @@ async function fetchGeoData(cachekey, api_url) {
         const data = await response.json();
 
         localStorage.setItem(cachekey, JSON.stringify(data));
+        localStorage.setItem(`${cachekey}_time`, Date.now());
         localStorage.setItem(`${cachekey}_time`, Date.now());
 
         return data;
