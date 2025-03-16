@@ -36,6 +36,15 @@ class CongressionalDistrict(models.Model):
 
     def __str__(self):
         return f"{self.state_abbr} - {self.district_number} ({self.district_type})"
+    
+class USDistrictTopojson(models.Model):
+    topojson = models.JSONField()
+
+    class Meta:
+        db_table = "us_districts_topo"
+
+    def __str__(self):
+        return self.id
 
 class CongressMembers(models.Model):
     bioguide_id = models.CharField(max_length=10, primary_key=True)

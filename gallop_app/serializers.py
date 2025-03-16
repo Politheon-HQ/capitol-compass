@@ -1,6 +1,6 @@
 import json
 from rest_framework import serializers
-from .models import USState, CongressionalDistrict, CongressMembers, CongressMembersWithProportions, CombinedData, USStateTopojson
+from .models import USState, CongressionalDistrict, CongressMembers, CongressMembersWithProportions, CombinedData, USStateTopojson, USDistrictTopojson
 
 class USStateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,6 +15,11 @@ class CongressionalDistrictSerializer(serializers.ModelSerializer):
     class Meta:
         model = CongressionalDistrict
         fields = '__all__'
+
+class USDistrictTopojsonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = USDistrictTopojson
+        fields = ['id', 'topojson']
 
 class CongressMembersSerializer(serializers.ModelSerializer):
     district = serializers.IntegerField(allow_null=True)

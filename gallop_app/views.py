@@ -4,8 +4,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
 from .utils import convert_to_topojson_states, convert_to_topojson_districts
-from .models import USState, CongressionalDistrict, CongressMembers, CongressMembersWithProportions, CombinedData, USStateTopojson
-from .serializers import USStateSerializer, CongressionalDistrictSerializer, CongressMembersSerializer, CongressMembersWithProportionsSerializer, CombinedDataSerializer, USStateTopojsonSerializer
+from .models import USState, CongressionalDistrict, CongressMembers, CongressMembersWithProportions, CombinedData, USStateTopojson, USDistrictTopojson
+from .serializers import USStateSerializer, CongressionalDistrictSerializer, CongressMembersSerializer, CongressMembersWithProportionsSerializer, CombinedDataSerializer, USStateTopojsonSerializer, USDistrictTopojsonSerializer
 
 # Create your views here.
 def dashboard_view(request):
@@ -52,6 +52,35 @@ class USStateTopoViewSet(APIView):
         Allows inserting a new TopoJSON entry via POST request.
         """
         serializer = USStateSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class USDistrictTopoViewSet(APIView):
+    def get(self, request, *args, **kwargs):
+        try:
+            # Get the latest TopoJSON entry from the database
+            topojson_data = USDistrictTopojson.objects.latest('id')
+            serializer = USDistrictTopojsonSerializer(topojson_data)
+
+            topojson = serializer.data.get("topojson", {})
+            if "type" not in topojson:
+                topojson["type"] = "Topology"
+
+            formatted_topojson = {
+                "type": "Topology",
+                **topojson  # Merge with the existing TopoJSON structure
+            }
+            return Response(formatted_topojson, status=status.HTTP_200_OK)
+        except USDistrictTopojson.DoesNotExist:
+            return Response({"error": "No TopoJSON data found"}, status=status.HTTP_404_NOT_FOUND)
+        
+    def post(self, request, *args, **kwargs):
+        """
+        Allows inserting a new TopoJSON entry via POST request.
+        """
+        serializer = USDistrictTopojsonSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
