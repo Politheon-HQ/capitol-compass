@@ -89,17 +89,14 @@ WSGI_APPLICATION = "gallop_project.wsgi.application"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 
-# Get the CA certificate from the environment variable
-DB_SSL_CA_CONTENT = os.getenv("DB_SSL_CA")
-
 # Write the CA certificate to a temporary file
-if DB_SSL_CA_CONTENT:
-    temp_ca_cert = tempfile.NamedTemporaryFile(delete=False, suffix=".crt", mode='w')
-    temp_ca_cert.write(DB_SSL_CA_CONTENT)
-    temp_ca_cert.close()
-    DB_SSL_CA_PATH = temp_ca_cert.name  # Path to the temp file
-else:
-    DB_SSL_CA_PATH = None  # If no cert is found, fallback
+#if DB_SSL_CA_CONTENT:
+ #   temp_ca_cert = tempfile.NamedTemporaryFile(delete=False, suffix=".crt", mode='w')
+#    temp_ca_cert.write(DB_SSL_CA_CONTENT)
+#    temp_ca_cert.close()
+ #   DB_SSL_CA_PATH = temp_ca_cert.name  # Path to the temp file
+#else:
+#    DB_SSL_CA_PATH = None  # If no cert is found, fallback
 
 DATABASES = {
    "default": {
@@ -110,12 +107,11 @@ DATABASES = {
         "HOST": os.getenv("DB_HOST"),
         "PORT": os.getenv("DB_PORT"),
         "OPTIONS": {
-            "ssl": {"ca": DB_SSL_CA_PATH}
+            "ssl": {"ca": os.getenv("DB_SSL_CA", "/tmp/ca-certificate.crt")}
         }
     }
 }
 
-print(f"CA Certificate saved at: {DB_SSL_CA_PATH}")
 # Load the database URL from Heroku or environment variables
 
 
