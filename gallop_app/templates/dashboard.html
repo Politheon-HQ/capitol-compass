@@ -10,15 +10,19 @@
 
     <!-- Include Plotly.js -->
     <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <!-- Include TopoJSON -->
     <script src="https://d3js.org/topojson.v3.min.js"></script>
-
+    <!-- Include D3 Library -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
     <!-- Link JavaScript Files -->
     <script src="{% static 'js/membersProfile.js' %}"></script>
     <script src="{% static 'js/congress_map.js' %}"></script>
     <script src="{% static 'js/radarChart.js' %}"></script>
-    <script src="{% static 'js/radarChartInfo.js' %}"></script>
+    <!-- Remove the old radarChartInfo.js -->
+    <script src="{% static 'js/radarChartD3Implementation.js' %}"></script>
     <script src="{% static 'js/ideologyChart.js' %}"></script>
     <script src="{% static 'js/tabs.js' %}"></script>
+    
 </head>
 <body>
     <!-- Main Header (Video Version) -->
