@@ -110,7 +110,7 @@ DATABASES = {
         "HOST": os.getenv("DB_HOST"),
         "PORT": os.getenv("DB_PORT"),
         "OPTIONS": {
-            "ssl": {"ssl_mode": "DISABLED"}
+
         }
     }
 }
@@ -166,4 +166,4 @@ WHITENOISE_KEEP_ONLY_HASHED_FILES = False
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Activate Django-Heroku.
-django_heroku.settings(locals())
+django_heroku.settings(locals(), staticfiles=False, databases = False)
