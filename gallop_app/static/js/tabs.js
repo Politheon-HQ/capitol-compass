@@ -15,16 +15,14 @@ function loadTab(tabName) {
     if (tabName === "general") {
         console.log("Loading general tab...");
     } else if (tabName === "members") {
-        // Restore previous member list when switching back to "General"
         if (window.previousMemberList && window.previousMemberList.length > 0) {
             console.log("Restoring previous member list....");
             restorePreviousMemberList();
         } 
     } else if (tabName === "radar-chart") {
-        // Load radar chart if switching to the Radar Chart tab
         console.log("Loading radar chart...");
-
-        if (!window.congressMembersData || window.congressMembersData.length > 0) {
+        // Ensure that globalMembersData is loaded and the dropdown is updated
+        if (window.congressMembersData && window.congressMembersData.length > 0) {
             initRadarDropdown(window.congressMembersData);
         } else {
             console.warn("Congress members data not loaded. Fetching data...");
@@ -44,9 +42,7 @@ function loadTab(tabName) {
             console.warn("No member selected for radar chart.");
         }
     } else if (tabName === "ideology-chart") {
-        // Load ideology chart if switching to the Ideology tab
         console.log("Loading ideology chart...");
-
         ensureIdeologyDataLoaded().then(() => {
             loadIdeologyChart();
         });
@@ -62,4 +58,3 @@ function loadTab(tabName) {
         console.warn(`Tab not found: ${tabName}`);
     }
 }
-
