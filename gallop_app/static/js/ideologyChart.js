@@ -22,10 +22,11 @@ async function fetchIdeologyData() {
                 try {
                     let labels;
 
-                    if (typeof d.assigned_label === 'string') {
-                        labels = JSON.parse(d.assigned_label);
-                    } else if (Array.isArray(d.assigned_label)) {
+                    if (Array.isArray(d.assigned_label)) {
                         labels = d.assigned_label;
+                    } else if (typeof d.assigned_label === 'string') {
+                        let fixed_string = d.assigned_label.replace(/'/g, '"');
+                        labels = JSON.parse(fixed_string);
                     } else {
                         throw new Error("Invalid assigned_label format");
                     }
