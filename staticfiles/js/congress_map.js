@@ -2,7 +2,6 @@
 // HEROKU PUSH VERSION //
 // congress_map.js
 
-
 let currentViewLevel = "national";  // Tracks zoom state: "national", "state", "district"
 let lastSelectedState = null;
 let lastSelectedDistrict = null;
@@ -229,7 +228,7 @@ function updateDistrictOverlay(districtFeature) {
     });
 }
 
-// Helper function to add a district overlay using scattergeo (solid green outline)
+// Helper function to add a district overlay with a glow effect using scattergeo
 function addDistrictOverlay(districtFeature) {
     let coords;
     if (districtFeature.geometry.type === "Polygon") {
@@ -242,18 +241,36 @@ function addDistrictOverlay(districtFeature) {
     }
     let lons = coords.map(c => c[0]);
     let lats = coords.map(c => c[1]);
-    let districtOverlay = {
+
+    // Main overlay trace with turquoise color
+    let mainOverlay = {
         type: "scattergeo",
         mode: "lines",
         lon: lons,
         lat: lats,
-        line: { color: "green", width: 4, dash: "solid" },
+        line: { color: "turquoise", width: 3, dash: "solid" },
+        opacity: 0.8,
         hoverinfo: "skip",
         showlegend: false,
         overlayType: "district"  // Custom property to identify district overlays
     };
-    Plotly.addTraces("plotly-map", [districtOverlay]).then(result => {
-        console.log("District overlay added.");
+
+    // Glow effect trace: wider, dotted, semi-transparent
+    let glowOverlay = {
+        type: "scattergeo",
+        mode: "lines",
+        lon: lons,
+        lat: lats,
+        line: { color: "turquoise", width: 4, dash: "solid" },
+        opacity: 0.4,
+        hoverinfo: "skip",
+        showlegend: false,
+        overlayType: "district"
+    };
+
+    // Add both traces
+    Plotly.addTraces("plotly-map", [glowOverlay, mainOverlay]).then(result => {
+        console.log("District overlay with glow effect added.");
     });
 }
 
