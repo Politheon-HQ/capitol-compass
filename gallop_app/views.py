@@ -49,7 +49,7 @@ class USStateTopoViewSet(APIView):
             
         formatted_topojson = get_cached_data("us_states_topojson", fetch_states)
         if formatted_topojson:
-            return Response(formatted_topojson.data, status=status.HTTP_200_OK)
+            return Response(formatted_topojson, status=status.HTTP_200_OK)
         else:
             return Response({"error": "No TopoJSON data found"}, status=status.HTTP_404_NOT_FOUND)
         
@@ -60,7 +60,7 @@ class USStateTopoViewSet(APIView):
         serializer = USStateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class USDistrictTopoViewSet(APIView):
@@ -84,7 +84,7 @@ class USDistrictTopoViewSet(APIView):
             
         formatted_topojson = get_cached_data("us_districts_topojson", fetch_districts)
         if formatted_topojson:
-            return Response(formatted_topojson.data, status=status.HTTP_200_OK)
+            return Response(formatted_topojson, status=status.HTTP_200_OK)
         else:
             return Response({"error": "No TopoJSON data found"}, status=status.HTTP_404_NOT_FOUND)
         
@@ -95,7 +95,7 @@ class USDistrictTopoViewSet(APIView):
         serializer = USDistrictTopojsonSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class CongressionalDistrictViewSet(APIView):
@@ -129,7 +129,7 @@ class CongressMembersViewSet(viewsets.ModelViewSet):
         
         cached_data = get_cached_data("congress_members", fetch_members)
         if cached_data:
-            return Response(cached_data.data, status=status.HTTP_200_OK)
+            return Response(cached_data, status=status.HTTP_200_OK)
         else:
             return Response({"error": "No data found"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -143,7 +143,7 @@ class CongressMembersWithProportionsViewSet(viewsets.ModelViewSet):
         
         cached_data = get_cached_data("congress_members_with_proportions", fetch_members_with_proportions)
         if cached_data:
-            return Response(cached_data.data, status=status.HTTP_200_OK)
+            return Response(cached_data, status=status.HTTP_200_OK)
         else:
             return Response({"error": "No data found"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -157,7 +157,7 @@ class CombinedDataViewSet(viewsets.ModelViewSet):
         
         cached_data = get_cached_data("combined_data", fetch_combined_data)
         if cached_data:
-            return Response(cached_data.data, status=status.HTTP_200_OK)
+            return Response(cached_data, status=status.HTTP_200_OK)
         else:
             return Response({"error": "No data found"}, status=status.HTTP_404_NOT_FOUND)
 
