@@ -68,14 +68,14 @@ const policyAreas = [
   {
     display: "National Security and International Affairs",
     member_self: "National_Security_and_International_Affairs_self_proportion",
-    member_across_all: "National_Security_and_International_Affairs_across_all_proportion",
-    state_self: "National_Security_And_International_Affairs_state_self_proportion",
-    state_national: "National_Security_And_International_Affairs_state_national_proportion"
+    member_across_all: "National_Security_and_International_Affairs_across_all_proportio",
+    state_self: "National_Security_And_International_Affairs_state_self_proportio",
+    state_national: "National_Security_And_International_Affairs_state_national_propo"
   },
   {
     display: "Science, Technology and Communications",
-    member_self: "Science__Technology__and_Communications_self_proportion", // double underscores
-    member_across_all: "Science__Technology__and_Communications_across_all_proportion",
+    member_self: "Science_Technology_and_Communications_self_proportion", 
+    member_across_all: "Science_Technology_and_Communications_across_all_proportion",
     state_self: "Science_Technology_And_Communications_state_self_proportion",
     state_national: "Science_Technology_And_Communications_state_national_proportion"
   },
@@ -122,6 +122,9 @@ function buildRadarDataset(member, proportionType) {
     const stField = (proportionType === 'self') ? area.state_self : area.state_national;
     let stVal = parseFloat(member[stField]) || 0;
 
+    // Log each area value to see what is coming in
+    console.log(`${area.display}: member value = ${memVal}, state value = ${stVal}`);
+
     // Apply chamber-specific scaling if needed:
     if (proportionType === 'across_all') {
       const scalingFactor = SCALING_FACTORS[member.chamber] || 1;
@@ -132,7 +135,7 @@ function buildRadarDataset(member, proportionType) {
     dataset[1].push({ axis: area.display, value: stVal });
   });
 
-  // **Assign fixed indices for the color scale:**
+  // Assign fixed indices for the color scale:
   dataset[0].index = 0;
   dataset[1].index = 1;
 
@@ -165,23 +168,25 @@ function initRadarDropdown(members) {
 * Renders or updates the radar chart.
 */
 function renderRadarChart(bioguideId, proportionType) {
-const member = globalMembersData.find(d => d.bioguide_id === bioguideId);
-if (!member) {
-  console.warn("No member found with ID:", bioguideId);
-  return;
-}
+  const member = globalMembersData.find(d => d.bioguide_id === bioguideId);
+  if (!member) {
+    console.warn("No member found with ID:", bioguideId);
+    return;
+  }
+  console.log("Selected member:", member);  // <-- Logging the selected member
 
-// Build the data array for RadarChart
-const dataForRadar = buildRadarDataset(member, proportionType);
+  // Build the data array for RadarChart
+  const dataForRadar = buildRadarDataset(member, proportionType);
+  console.log("Data for Radar:", dataForRadar);  // <-- Logging the built dataset
 
-// First time? Create the chart from scratch
-if (!radarChartInitialized) {
-  RadarChart("#radar-chart", dataForRadar, radarChartOptions);
-  radarChartInitialized = true;
-} else {
-  // Already drawn? Smoothly update with transitions
-  RadarChart.update(dataForRadar);
-}
+  // First time? Create the chart from scratch
+  if (!radarChartInitialized) {
+    RadarChart("#radar-chart", dataForRadar, radarChartOptions);
+    radarChartInitialized = true;
+  } else {
+    // Already drawn? Smoothly update with transitions
+    RadarChart.update(dataForRadar);
+  }
 }
 
 /**
