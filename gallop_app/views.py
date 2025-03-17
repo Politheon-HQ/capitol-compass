@@ -3,7 +3,7 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-from .utils import convert_to_topojson_states, convert_to_topojson_districts
+from .utils import convert_to_topojson_states, convert_to_topojson_districts, get_cached_data
 from .models import USState, CongressionalDistrict, CongressMembers, CongressMembersWithProportions, CombinedData, USStateTopojson, USDistrictTopojson
 from .serializers import USStateSerializer, CongressionalDistrictSerializer, CongressMembersSerializer, CongressMembersWithProportionsSerializer, CombinedDataSerializer, USStateTopojsonSerializer, USDistrictTopojsonSerializer
 
@@ -30,21 +30,27 @@ class USStateViewSet(APIView):
     
 class USStateTopoViewSet(APIView):
     def get(self, request, *args, **kwargs):
-        try:
-            # Get the latest TopoJSON entry from the database
-            topojson_data = USStateTopojson.objects.latest('id')
-            serializer = USStateTopojsonSerializer(topojson_data)
+        def fetch_states():
+            try:
+                # Get the latest TopoJSON entry from the database
+                topojson_data = USStateTopojson.objects.latest('id')
+                serializer = USStateTopojsonSerializer(topojson_data)
 
-            topojson = serializer.data.get("topojson", {})
-            if "type" not in topojson:
-                topojson["type"] = "Topology"
+                topojson = serializer.data.get("topojson", {})
+                if "type" not in topojson:
+                    topojson["type"] = "Topology"
 
-            formatted_topojson = {
-                "type": "Topology",
-                **topojson  # Merge with the existing TopoJSON structure
-            }
+                return{
+                    "type": "Topology",
+                    **topojson  # Merge with the existing TopoJSON structure
+                }
+            except USStateTopojson.DoesNotExist:
+                return None
+            
+        formatted_topojson = get_cached_data("us_states_topojson", fetch_states)
+        if formatted_topojson:
             return Response(formatted_topojson, status=status.HTTP_200_OK)
-        except USStateTopojson.DoesNotExist:
+        else:
             return Response({"error": "No TopoJSON data found"}, status=status.HTTP_404_NOT_FOUND)
         
     def post(self, request, *args, **kwargs):
@@ -59,21 +65,27 @@ class USStateTopoViewSet(APIView):
     
 class USDistrictTopoViewSet(APIView):
     def get(self, request, *args, **kwargs):
-        try:
-            # Get the latest TopoJSON entry from the database
-            topojson_data = USDistrictTopojson.objects.latest('id')
-            serializer = USDistrictTopojsonSerializer(topojson_data)
+        def fetch_districts():
+            try:
+                # Get the latest TopoJSON entry from the database
+                topojson_data = USDistrictTopojson.objects.latest('id')
+                serializer = USDistrictTopojsonSerializer(topojson_data)
 
-            topojson = serializer.data.get("topojson", {})
-            if "type" not in topojson:
-                topojson["type"] = "Topology"
+                topojson = serializer.data.get("topojson", {})
+                if "type" not in topojson:
+                    topojson["type"] = "Topology"
 
-            formatted_topojson = {
-                "type": "Topology",
-                **topojson  # Merge with the existing TopoJSON structure
-            }
+                return {
+                    "type": "Topology",
+                    **topojson  # Merge with the existing TopoJSON structure
+                }
+            except USDistrictTopojson.DoesNotExist:
+                return None
+            
+        formatted_topojson = get_cached_data("us_districts_topojson", fetch_districts)
+        if formatted_topojson:
             return Response(formatted_topojson, status=status.HTTP_200_OK)
-        except USDistrictTopojson.DoesNotExist:
+        else:
             return Response({"error": "No TopoJSON data found"}, status=status.HTTP_404_NOT_FOUND)
         
     def post(self, request, *args, **kwargs):
@@ -108,16 +120,43 @@ class USStateTopojsonViewSet(viewsets.ModelViewSet):
     serializer_class = USStateTopojsonSerializer
 
 class CongressMembersViewSet(viewsets.ModelViewSet):
-    queryset = CongressMembers.objects.all()
-    serializer_class = CongressMembersSerializer
+    def list(self, request, *args, **kwargs):
+        def fetch_members():
+            queryset = CongressMembers.objects.all()
+            serializer = CongressMembersSerializer(queryset, many=True)
+            return serializer.data
+        
+        cached_data = get_cached_data("congress_members", fetch_members)
+        if cached_data:
+            return Response(cached_data, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "No data found"}, status=status.HTTP_404_NOT_FOUND)
 
 class CongressMembersWithProportionsViewSet(viewsets.ModelViewSet):
-    queryset = CongressMembersWithProportions.objects.all()
-    serializer_class = CongressMembersWithProportionsSerializer
+    def list(self, request, *args, **kwargs):
+        def fetch_members_with_proportions():
+            queryset = CongressMembersWithProportions.objects.all()
+            serializer = CongressMembersWithProportionsSerializer(queryset, many=True)
+            return serializer.data
+        
+        cached_data = get_cached_data("congress_members_with_proportions", fetch_members_with_proportions)
+        if cached_data:
+            return Response(cached_data, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "No data found"}, status=status.HTTP_404_NOT_FOUND)
 
 class CombinedDataViewSet(viewsets.ModelViewSet):
-    queryset = CombinedData.objects.all()
-    serializer_class = CombinedDataSerializer
+    def list(self, request, *args, **kwargs):
+        def fetch_combined_data():
+            queryset = CombinedData.objects.all()
+            serializer = CombinedDataSerializer(queryset, many=True)
+            return serializer.data
+        
+        cached_data = get_cached_data("combined_data", fetch_combined_data)
+        if cached_data:
+            return Response(cached_data, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "No data found"}, status=status.HTTP_404_NOT_FOUND)
 
     
     

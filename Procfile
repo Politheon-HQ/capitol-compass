@@ -1,1 +1,1 @@
-web: ./heroku_startup.sh
+web: gunicorn gallop_project.wsgi --log-file - --timeout 120
