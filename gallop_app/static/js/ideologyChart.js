@@ -31,7 +31,16 @@ async function fetchIdeologyData() {
             data.forEach(d => {
                 if (d.assigned_label) {
                     try {
-                        let labels = JSON.parse(d.assigned_label);
+                        let labels;
+
+                        if (typeof d.assigned_label === 'string') {
+                            labels = JSON.parse(d.assigned_label);
+                        } else if (Array.isArray(d.assigned_label)) {
+                            labels = d.assigned_label;
+                        } else {
+                            throw new Error("Invalid assigned_label format");
+                        }
+
                         if (Array.isArray(labels)) {
                             labels.forEach(topic => topics.add(topic));
                         }

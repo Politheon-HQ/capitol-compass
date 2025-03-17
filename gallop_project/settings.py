@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 import django_heroku
-import tempfile
+import django_redis
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -84,19 +84,22 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "gallop_project.wsgi.application"
 
+# Redis Cache
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': os.getenv('REDIS_URL')},
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'CONNECTION_POOL_KWARGS': {
+                'max_connections': 100,
+            },
+        }
+}
+
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
-
-# Write the CA certificate to a temporary file
-#if DB_SSL_CA_CONTENT:
- #   temp_ca_cert = tempfile.NamedTemporaryFile(delete=False, suffix=".crt", mode='w')
-#    temp_ca_cert.write(DB_SSL_CA_CONTENT)
-#    temp_ca_cert.close()
- #   DB_SSL_CA_PATH = temp_ca_cert.name  # Path to the temp file
-#else:
-#    DB_SSL_CA_PATH = None  # If no cert is found, fallback
 
 DATABASES = {
    "default": {
@@ -111,8 +114,6 @@ DATABASES = {
         }
     }
 }
-
-# Load the database URL from Heroku or environment variables
 
 
 # Password validation
@@ -157,6 +158,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 ## Use WhiteNoise's storage backend that appends a unique hash to filenames,
 ## so browsers always load the updated version when files change.
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+WHITENOISE_KEEP_ONLY_HASHED_FILES = False
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
