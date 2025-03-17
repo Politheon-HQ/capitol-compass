@@ -1,1 +1,1 @@
-web: gunicorn gallop_project.wsgi --log-file - --timeout 120
+web: gunicorn gallop_project.wsgi --log-file - 
