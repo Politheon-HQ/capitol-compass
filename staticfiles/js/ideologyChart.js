@@ -119,7 +119,17 @@ function getDataForTopic(data, topic) {
 
     let counts = data.reduce((acc, d) => {
         try {
-            let topics = JSON.parse(d.assigned_label);
+            let topics;
+
+            if (Array.isArray(d.assigned_label)) {
+                topics = d.assigned_label;
+            } else if (typeof d.assigned_label === 'string') {
+                let fixed_string = d.assigned_label.replace(/'/g, '"');
+                topics = JSON.parse(fixed_string);
+            } else {
+                throw new Error("Invalid assigned_label format");
+            }
+           
             if (Array.isArray(topics) && topics.includes(topic)) {
                 acc[d.state] = (acc[d.state] || 0) + 1;
             }

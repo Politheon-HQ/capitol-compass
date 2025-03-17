@@ -21,6 +21,10 @@ async function fetchGeoData(api_url) {
         console.log(`Fetching new data from ${api_url}...`);
         const response = await fetch(api_url);
         if (!response.ok) throw new Error(`Failed to fetch ${api_url} data`);
+
+        const data = await response.json();
+
+        console.log(`Fetched data from ${api_url}:`, data);
         return data;
     } catch (error) {
         console.error(`Error fetching ${api_url} data:`, error);
