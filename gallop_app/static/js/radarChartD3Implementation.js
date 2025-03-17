@@ -139,79 +139,92 @@ function buildRadarDataset(member, proportionType) {
   return dataset;
 }
 
+
+
 /**
- * Renders or updates the radar chart:
- * - On first call, it draws the chart with RadarChart(...)
- * - On subsequent calls, it updates in place with RadarChart.update(...)
+ * Initializes the dropdown for radar chart members.
  */
-function renderRadarChart(bioguideId, proportionType) {
-  const member = globalMembersData.find(d => d.bioguide_id === bioguideId);
-  if (!member) {
-    console.warn("No member found with ID:", bioguideId);
-    return;
+function initRadarDropdown(members) {
+  console.log("Initializing radar dropdown with members:", members);
+  const dropdown = document.getElementById("radar-member-select");
+  if (!dropdown) {
+      console.error("Radar chart member list not found.");
+      return;
   }
-
-  // Build the data array for RadarChart
-  const dataForRadar = buildRadarDataset(member, proportionType);
-
-  // First time? Create the chart from scratch
-  if (!radarChartInitialized) {
-    RadarChart("#radar-chart", dataForRadar, radarChartOptions);
-    radarChartInitialized = true;
-  } else {
-    // Already drawn? Smoothly update with transitions
-    RadarChart.update(dataForRadar);
-  }
+  dropdown.innerHTML = "";
+  dropdown.append(new Option("-- Select a Member --", ""));
+  members.forEach(member => {
+      const opt = document.createElement("option");
+      opt.value = member.bioguide_id;
+      opt.text = `${member.name} (${member.state})`;
+      dropdown.appendChild(opt);
+  });
 }
 
 /**
- * On DOM load: fetch API data, populate dropdown, and wire up events
- */
+* Renders or updates the radar chart.
+*/
+function renderRadarChart(bioguideId, proportionType) {
+const member = globalMembersData.find(d => d.bioguide_id === bioguideId);
+if (!member) {
+  console.warn("No member found with ID:", bioguideId);
+  return;
+}
+
+// Build the data array for RadarChart
+const dataForRadar = buildRadarDataset(member, proportionType);
+
+// First time? Create the chart from scratch
+if (!radarChartInitialized) {
+  RadarChart("#radar-chart", dataForRadar, radarChartOptions);
+  radarChartInitialized = true;
+} else {
+  // Already drawn? Smoothly update with transitions
+  RadarChart.update(dataForRadar);
+}
+}
+
+/**
+* DOMContentLoaded: Fetch API data, initialize dropdown, and wire up events.
+*/
 document.addEventListener("DOMContentLoaded", function() {
   // Replace the CSV fetch with an API call
   fetch("/api/member_proportions/")
     .then(response => {
-      if (!response.ok) throw new Error("Failed to fetch API data.");
-      return response.json();
+        if (!response.ok) throw new Error("Failed to fetch API data.");
+        return response.json();
     })
     .then(apiData => {
-      globalMembersData = apiData;
+        globalMembersData = apiData;
 
-      // Populate the <select> dropdown
-      const dropdown = document.getElementById("radar-member-select");
-      dropdown.innerHTML = "";
-      dropdown.append(new Option("-- Select a Member --", ""));
-      globalMembersData.forEach(member => {
-        const opt = document.createElement("option");
-        opt.value = member.bioguide_id;
-        opt.text = `${member.name} (${member.state})`;
-        dropdown.appendChild(opt);
-      });
+        // Initialize the dropdown using the new function
+        initRadarDropdown(globalMembersData);
 
-      // Change event for the dropdown
-      dropdown.addEventListener("change", function() {
-        const selectedID = this.value;
-        if (!selectedID) return;
-        const proportionType = document.querySelector('input[name="proportion-toggle"]:checked').value;
-        renderRadarChart(selectedID, proportionType);
-      });
-
-      // Change events for the radio buttons (for toggling between 'self' and 'across_all')
-      const radios = document.querySelectorAll('input[name="proportion-toggle"]');
-      radios.forEach(radio => {
-        radio.addEventListener("change", function() {
-          const selectedID = dropdown.value;
-          if (selectedID) {
-            renderRadarChart(selectedID, this.value);
-          }
+        // Change event for the dropdown
+        const dropdown = document.getElementById("radar-member-select");
+        dropdown.addEventListener("change", function() {
+            const selectedID = this.value;
+            if (!selectedID) return;
+            const proportionType = document.querySelector('input[name="proportion-toggle"]:checked').value;
+            renderRadarChart(selectedID, proportionType);
         });
-      });
 
-      // Optionally auto-select the first member if available
-      if (globalMembersData.length > 0) {
-        dropdown.value = globalMembersData[0].bioguide_id;
-        renderRadarChart(globalMembersData[0].bioguide_id, "self");
-      }
+        // Change events for the radio buttons (for toggling between 'self' and 'across_all')
+        const radios = document.querySelectorAll('input[name="proportion-toggle"]');
+        radios.forEach(radio => {
+            radio.addEventListener("change", function() {
+                const selectedID = dropdown.value;
+                if (selectedID) {
+                    renderRadarChart(selectedID, this.value);
+                }
+            });
+        });
+
+        // Optionally auto-select the first member if available
+        if (globalMembersData.length > 0) {
+            dropdown.value = globalMembersData[0].bioguide_id;
+            renderRadarChart(globalMembersData[0].bioguide_id, "self");
+        }
     })
     .catch(err => console.error("Error loading API data for RadarChart:", err));
 });
