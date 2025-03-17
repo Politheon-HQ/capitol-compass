@@ -189,7 +189,7 @@ function addStateOverlay(stateFeature) {
             mode: "lines",
             lon: lons,
             lat: lats,
-            line: { color: "gold", width: 4 },
+            line: { color: "turquoise", width: 4 },
             hoverinfo: "skip",
             showlegend: false
         };
@@ -242,34 +242,22 @@ function addDistrictOverlay(districtFeature) {
     let lons = coords.map(c => c[0]);
     let lats = coords.map(c => c[1]);
 
-    // Main overlay trace with turquoise color
-    let mainOverlay = {
+    // District overlay with yellow fill and white border
+    let fillOverlay = {
         type: "scattergeo",
         mode: "lines",
         lon: lons,
         lat: lats,
-        line: { color: "turquoise", width: 3, dash: "solid" },
-        opacity: 0.8,
+        fill: "toself",         // Fill the polygon
+        fillcolor: "gold",     // Yellow fill
+        line: { color: "white", width: 2 },  // White border
         hoverinfo: "skip",
         showlegend: false,
-        overlayType: "district"  // Custom property to identify district overlays
-    };
-
-    // Glow effect trace: wider, dotted, semi-transparent
-    let glowOverlay = {
-        type: "scattergeo",
-        mode: "lines",
-        lon: lons,
-        lat: lats,
-        line: { color: "turquoise", width: 4, dash: "solid" },
-        opacity: 0.4,
-        hoverinfo: "skip",
-        showlegend: false,
-        overlayType: "district"
+        overlayType: "district"  // Custom property for identifying overlays
     };
 
     // Add both traces
-    Plotly.addTraces("plotly-map", [glowOverlay, mainOverlay]).then(result => {
+    Plotly.addTraces("plotly-map", [fillOverlay]).then(result => {
         console.log("District overlay with glow effect added.");
     });
 }
