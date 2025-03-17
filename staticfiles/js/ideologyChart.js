@@ -1,68 +1,56 @@
 // Global variable to store ideology data
 window.ideologyData = [];
 window.ideologyTopics = [];
-const CACHE_KEY = "ideology_cache";
-const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+// API Endpoint
+const IDEOLOGY_API = "/api/combined_data/";
 
 // Function to fetch data from API with caching
 async function fetchIdeologyData() {
-    const cachedData = localStorage.getItem(CACHE_KEY);
-    const cachedTime = localStorage.getItem(`${CACHE_KEY}_time`);
+    try {
+        console.log("Fetching new ideology data from API...");
+        const response = await fetch(IDEOLOGY_API);
+        if (!response.ok) throw new Error(`Failed to fetch data from ${IDEOLOGY_API}`);
 
-    if (cachedData && cachedTime) {
-        const now = Date.now();
-        if (now - cachedTime < CACHE_EXPIRY) {
-            console.log("Using cached ideology data.");
-            const parsedData = JSON.parse(cachedData);
-            window.ideologyData = parsedData.data;
-            window.ideologyTopics = parsedData.topics;
-            return parsedData;
-        }
-    }
+        const data = await response.json();
+        console.log("Fetched data:", data);
 
-    console.log("Fetching new ideology data from API...");
-    return fetch("/api/combined_data/")
-        .then(response => response.json())
-        .then(data => {
-            console.log("Fetched API data:", data);
+        // Extract unique topics
+        let topics = new Set();
+        data.forEach(d => {
+            if (d.assigned_label) {
+                try {
+                    let labels;
 
-            // Extract unique topics
-            let topics = new Set();
-            data.forEach(d => {
-                if (d.assigned_label) {
-                    try {
-                        let labels;
-
-                        if (typeof d.assigned_label === 'string') {
-                            labels = JSON.parse(d.assigned_label);
-                        } else if (Array.isArray(d.assigned_label)) {
-                            labels = d.assigned_label;
-                        } else {
-                            throw new Error("Invalid assigned_label format");
-                        }
-
-                        if (Array.isArray(labels)) {
-                            labels.forEach(topic => topics.add(topic));
-                        }
-                    } catch (error) {
-                        console.error("Error parsing assigned_label:", error, "Raw value:", d.assigned_label);  
+                    if (Array.isArray(d.assigned_label)) {
+                        labels = d.assigned_label;
+                    } else if (typeof d.assigned_label === 'string') {
+                        let fixed_string = d.assigned_label.replace(/'/g, '"');
+                        labels = JSON.parse(fixed_string);
+                    } else {
+                        throw new Error("Invalid assigned_label format");
                     }
+
+                    if (Array.isArray(labels)) {
+                        labels.forEach(topic => topics.add(topic));
+                    }
+                } catch (error) {
+                    console.error("Error parsing assigned_label:", error, "Raw value:", d.assigned_label);  
                 }
-            });
+            }
+        });
 
-            console.log("Extracted topics:", [...topics]);
+        console.log("Extracted topics:", [...topics]);
 
-            // Store data globally
-            window.ideologyData = data;
-            window.ideologyTopics = [...topics];
+        // Store data globally
+        window.ideologyData = data;
+        window.ideologyTopics = [...topics];
 
-            // Cache data in localStorage
-            localStorage.setItem(CACHE_KEY, JSON.stringify({ data: data, topics: [...topics] }));
-            localStorage.setItem(`${CACHE_KEY}_time`, Date.now());
-
-            return { ideologyData: data, ideologyTopics: [...topics] };
-        })
-        .catch(error => console.error("Error fetching ideology data:", error));
+        return { ideologyData: data, ideologyTopics: [...topics] };
+    } catch(error) {
+        console.error("Error fetching ideology data:", error);
+        return null;
+    } 
 }
 
 // Function to load ideology data and initialize chart

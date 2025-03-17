@@ -9,39 +9,21 @@ let allDistricts = null;  // Store full districts data in memory
 let cachedDistricts = {};  // Cache for district data by state
 let stateDistricts = [];  // Store districts of the currently selected state
 
-// Cache keys and expiry time (24 hours)
-const CACHE_KEYS = {
-    STATES: "us_states_cache",
-    DISTRICTS: "congressional_districts_cache"
+// Geometry API Endpoints
+const GEO_APIS = {
+    STATES: "/api/us_states_topojson/",
+    DISTRICTS: "/api/us_districts_topojson/"
 };
-const CACHE_EXPIRY_MAP = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
-// Fetch data from API with caching
-async function fetchGeoData(cachekey, api_url) {
-    const cachedData = localStorage.getItem(cachekey);
-    const cachedTime = localStorage.getItem(`${cachekey}_time`);
-
-    if (cachedData && cachedTime) {
-        const now = Date.now();
-        if (now - Number(cachedTime) < CACHE_EXPIRY_MAP) {
-            console.log(`Using cached data for ${cachekey}.`);
-            return JSON.parse(cachedData);
-        }
-    }
-
+// Function to fetch data from Django API
+async function fetchGeoData(api_url) {
     try {
-        console.log(`Fetching new data for ${cachekey} from API...`);
+        console.log(`Fetching new data from ${api_url}...`);
         const response = await fetch(api_url);
-        if (!response.ok) throw new Error(`Failed to fetch ${cachekey} data`);
-        const data = await response.json();
-
-        localStorage.setItem(cachekey, JSON.stringify(data));
-        localStorage.setItem(`${cachekey}_time`, Date.now());
-        localStorage.setItem(`${cachekey}_time`, Date.now());
-
+        if (!response.ok) throw new Error(`Failed to fetch ${api_url} data`);
         return data;
     } catch (error) {
-        console.error(`Error fetching ${cachekey} data:`, error);
+        console.error(`Error fetching ${api_url} data:`, error);
         return null;
     }
 }
@@ -50,8 +32,8 @@ async function fetchGeoData(cachekey, api_url) {
 async function loadMapData() {
     try {
         const [loadedStates, loadedDistricts] = await Promise.all([
-            fetchGeoData(CACHE_KEYS.STATES, "/api/us_states_topojson/"),
-            fetchGeoData(CACHE_KEYS.DISTRICTS, "/api/us_districts_topojson/")
+            fetchGeoData(GEO_APIS.STATES),
+            fetchGeoData(GEO_APIS.DISTRICTS)
         ]);
 
         if (!loadedStates || !loadedDistricts) {
@@ -59,7 +41,7 @@ async function loadMapData() {
             return;
         }
 
-        // Convert JSON to GeoJSON
+        // Assign variables for map
         states = topojson.feature(loadedStates, loadedStates.objects.us_states);
         allDistricts = topojson.feature(loadedDistricts, loadedDistricts.objects.congressional_districts);
 

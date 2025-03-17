@@ -2,36 +2,18 @@
 let membersData = [];
 window.previousMemberList = [];
 
-const cacheKeyMembers = "congress_members_cache";
-const cacheExpiryMembers = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+// API Endpoint
+const MEMBERS_API = "/api/congress_members/";
 
 // Function to fetch Congress members from API with caching
 async function fetchCongressMembers() {
-    const cachedMembers = localStorage.getItem(cacheKeyMembers);
-    const cachedTime = localStorage.getItem(`${cacheKeyMembers}_time`);
-
-    // Check if cached data is still valid
-    if (cachedMembers && cachedTime) {
-        const now = new Date().getTime();
-        if (now - cachedTime < cacheExpiryMembers) {
-            console.log("Using cached Congress members data.");
-            membersData = JSON.parse(cachedMembers);
-            window.membersData = membersData; // Store globally for other functions
-            return membersData;
-        }
-    }
-
     try {
         console.log("Fetching new Congress members data from API...");
-        const response = await fetch("/api/congress_members/");
+        const response = await fetch(MEMBERS_API);
         if (!response.ok) throw new Error("Failed to fetch Congress members data");
 
         const data = await response.json();
         window.membersData = data; 
-
-        localStorage.setItem(cacheKeyMembers, JSON.stringify(data));
-        localStorage.setItem(`${cacheKeyMembers}_time`, new Date().getTime());
-
         return data;
     } catch (error) {
         console.error("Error fetching Congress members data:", error);
