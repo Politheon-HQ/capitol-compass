@@ -46,5 +46,20 @@ python manage.py runserver
 - 🔄 **Radar Chart D3 Conversion** (Under Construction but Possible 🚧)  
 - 📈 **Additional Metrics & Enhancements**  
 
+## Other Stuff  
+
+### Tips for local development:
+- Sometimes latest changes don't update (even locally).  Try: python manage.py collectstatic
+- Try running different launch ports to force cache refresh: python manage.py runserver 8025 (Change Port)
+
+
+#### To add new data
+- Add Data to database (Digital Ocean)
+- Setup connection in the following:
+-   gallop_app/models.py
+-   gallop_app/views.py
+-   gallop_app/serializers.py
+-   gallop_app/urls.py
+
 
 
