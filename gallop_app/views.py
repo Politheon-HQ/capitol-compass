@@ -120,11 +120,12 @@ class USStateTopojsonViewSet(viewsets.ModelViewSet):
     serializer_class = USStateTopojsonSerializer
 
 class CongressMembersViewSet(viewsets.ModelViewSet):
+    queryset = CongressMembers.objects.all()
+    serializer_class = CongressMembersSerializer
+
     def list(self, request, *args, **kwargs):
         def fetch_members():
-            queryset = CongressMembers.objects.all()
-            serializer = CongressMembersSerializer(queryset, many=True)
-            return serializer.data
+            return list(self.queryset.values())
         
         cached_data = get_cached_data("congress_members", fetch_members)
         if cached_data:
@@ -133,11 +134,12 @@ class CongressMembersViewSet(viewsets.ModelViewSet):
             return Response({"error": "No data found"}, status=status.HTTP_404_NOT_FOUND)
 
 class CongressMembersWithProportionsViewSet(viewsets.ModelViewSet):
+    queryset = CongressMembersWithProportions.objects.all()
+    serializer_class = CongressMembersWithProportionsSerializer
+
     def list(self, request, *args, **kwargs):
         def fetch_members_with_proportions():
-            queryset = CongressMembersWithProportions.objects.all()
-            serializer = CongressMembersWithProportionsSerializer(queryset, many=True)
-            return serializer.data
+            return list(self.queryset.values())
         
         cached_data = get_cached_data("congress_members_with_proportions", fetch_members_with_proportions)
         if cached_data:
@@ -146,11 +148,12 @@ class CongressMembersWithProportionsViewSet(viewsets.ModelViewSet):
             return Response({"error": "No data found"}, status=status.HTTP_404_NOT_FOUND)
 
 class CombinedDataViewSet(viewsets.ModelViewSet):
+    queryset = CombinedData.objects.all()
+    serializer_class = CombinedDataSerializer
+
     def list(self, request, *args, **kwargs):
         def fetch_combined_data():
-            queryset = CombinedData.objects.all()
-            serializer = CombinedDataSerializer(queryset, many=True)
-            return serializer.data
+            return list(self.queryset.values())
         
         cached_data = get_cached_data("combined_data", fetch_combined_data)
         if cached_data:
