@@ -19,15 +19,18 @@ def get_cached_data(cache_key, fetch_function, timeout=86400):
     # Check if data is cached in Redis
     cached_data = cache.get(cache_key)
     if cached_data is not None:
+        print(f"Cache hit for key: {cache_key}")
         return JsonResponse(cached_data, safe=False)
     
     # If not cached, fetch from the API
     data = fetch_function()
     if data:
         cache.set(cache_key, data, timeout=timeout)  # Cache for 24 hours
+        print(f"Cache miss for key: {cache_key} - data fetched and cached ({len(data) if isinstance(data, list) else 'unknown'} items)")
         return JsonResponse(data, safe=False)
     else:
         # Log the error or handle it as needed
+        print(f"Fetch function for {cache_key} failed to return data.")
         return JsonResponse({"error": "Failed to fetch data"}, status=500)
 
 
