@@ -1,5 +1,7 @@
 // JavaScript code for interactive map of US Congress members //
 // HEROKU PUSH VERSION //
+// congress_map.js
+
 
 let currentViewLevel = "national";  // Tracks zoom state: "national", "state", "district"
 let lastSelectedState = null;
@@ -36,7 +38,6 @@ async function fetchGeoData(cachekey, api_url) {
         const data = await response.json();
 
         localStorage.setItem(cachekey, JSON.stringify(data));
-        localStorage.setItem(`${cachekey}_time`, Date.now());
         localStorage.setItem(`${cachekey}_time`, Date.now());
 
         return data;
@@ -115,7 +116,7 @@ function initPlotlyMap() {
 
     console.log("Plotly map initialized");
 
-    // Event Listeners for clicking on states and districts
+    // Event listener for clicking on states and districts
     document.getElementById("plotly-map").on("plotly_click", function(data) {
         let clickedPoint = data.points[0].location;
         console.log("Clicked point:", clickedPoint);
@@ -132,9 +133,9 @@ function initPlotlyMap() {
     });
 }
 
-// Function to load district data
+// Function to load district data (update existing district traces)
 function updateDistricts(districts) {
-    // Remove previous district traces
+    // Remove previous district traces (all traces except the first state trace)
     let numTraces = document.getElementById("plotly-map").data.length;
     if (numTraces > 1) {
         for (let i = numTraces - 1; i >= 1; i--) {
@@ -167,6 +168,95 @@ function updateDistricts(districts) {
     Plotly.addTraces("plotly-map", districtTrace);
 }
 
+// Helper function to add a state overlay using scattergeo (outline only)
+function addStateOverlay(stateFeature) {
+    let overlays = [];
+    if (stateFeature.geometry.type === "Polygon") {
+        overlays.push(stateFeature.geometry.coordinates[0]);
+    } else if (stateFeature.geometry.type === "MultiPolygon") {
+        stateFeature.geometry.coordinates.forEach(polygon => {
+            overlays.push(polygon[0]);
+        });
+    } else {
+        console.error("Unsupported geometry type for state overlay");
+        return;
+    }
+
+    let overlayTraces = overlays.map(ring => {
+        let lons = ring.map(c => c[0]);
+        let lats = ring.map(c => c[1]);
+        return {
+            type: "scattergeo",
+            mode: "lines",
+            lon: lons,
+            lat: lats,
+            line: { color: "gold", width: 4 },
+            hoverinfo: "skip",
+            showlegend: false
+        };
+    });
+
+    Plotly.addTraces("plotly-map", overlayTraces).then(result => {
+        console.log("State overlay added.");
+    });
+}
+
+// Remove any existing district overlay traces by scanning for custom property overlayType === 'district'
+// Now returns a promise so we can chain the addition of a new overlay.
+function removeDistrictOverlays() {
+    const mapDiv = document.getElementById("plotly-map");
+    let indicesToRemove = [];
+    mapDiv.data.forEach((trace, index) => {
+        if (trace.overlayType && trace.overlayType === "district") {
+            indicesToRemove.push(index);
+        }
+    });
+    if (indicesToRemove.length > 0) {
+        // Delete indices in descending order to prevent shifting issues
+        indicesToRemove.sort((a, b) => b - a);
+        return Plotly.deleteTraces("plotly-map", indicesToRemove).then(() => {
+            console.log("Existing district overlays removed.");
+        });
+    } else {
+        return Promise.resolve();
+    }
+}
+
+// Helper function to update district overlay: remove any existing district overlay before adding a new one
+function updateDistrictOverlay(districtFeature) {
+    removeDistrictOverlays().then(() => {
+        addDistrictOverlay(districtFeature);
+    });
+}
+
+// Helper function to add a district overlay using scattergeo (solid green outline)
+function addDistrictOverlay(districtFeature) {
+    let coords;
+    if (districtFeature.geometry.type === "Polygon") {
+        coords = districtFeature.geometry.coordinates[0];
+    } else if (districtFeature.geometry.type === "MultiPolygon") {
+        coords = districtFeature.geometry.coordinates[0][0];
+    } else {
+        console.error("Unsupported geometry type for district overlay");
+        return;
+    }
+    let lons = coords.map(c => c[0]);
+    let lats = coords.map(c => c[1]);
+    let districtOverlay = {
+        type: "scattergeo",
+        mode: "lines",
+        lon: lons,
+        lat: lats,
+        line: { color: "green", width: 4, dash: "solid" },
+        hoverinfo: "skip",
+        showlegend: false,
+        overlayType: "district"  // Custom property to identify district overlays
+    };
+    Plotly.addTraces("plotly-map", [districtOverlay]).then(result => {
+        console.log("District overlay added.");
+    });
+}
+
 // Function to zoom into a state
 function stateClicked(stateID) {
     let stateFeature = states.features.find(d => d.properties.STATEFP === stateID);
@@ -175,9 +265,11 @@ function stateClicked(stateID) {
         return;
     }
 
-    // Extract state abbreviation from selected state
     let stateAbbr = stateFeature.properties.STUSPS;
     let stateName = stateFeature.properties.NAME;
+
+    document.getElementById("map-header").innerText = stateName + " Selected";
+    document.getElementById("member-header").innerText = "Congress Members for " + stateName;
 
     console.log(`Checking data for districts of ${stateAbbr}`);
     stateDistricts = cachedDistricts[stateAbbr] || allDistricts.features.filter(d => d.properties.OFFICE_ID.startsWith(stateAbbr));
@@ -188,7 +280,6 @@ function stateClicked(stateID) {
     let lonRange = maxLon - minLon;
     let latRange = maxLat - minLat;
 
-    // Apply extra padding for large states
     let lonPadding, latPadding;
     if (["CA", "TX", "NV"].includes(stateAbbr)) {
         lonPadding = lonRange * 0.25;
@@ -201,19 +292,14 @@ function stateClicked(stateID) {
         latPadding = latRange * 0.1;
     }
 
-    // Adjust bounding box
     let adjMinLon = minLon - lonPadding;
     let adjMaxLon = maxLon + lonPadding;
     let adjMinLat = minLat - latPadding;
     let adjMaxLat = maxLat + latPadding;
 
-    // Calculate new center and zoom scale
     let newLonCenter = (adjMinLon + adjMaxLon) / 2;
     let newLatCenter = (adjMinLat + adjMaxLat) / 2;
     let optimalScale = calculateZoom(adjMinLon, adjMaxLon, adjMinLat, adjMaxLat);
-
-    // Switch to 'Members' tab (assuming loadTab is defined)
-    loadTab("members");
 
     Plotly.relayout("plotly-map", {
         "geo.center": { lon: newLonCenter, lat: newLatCenter },
@@ -222,18 +308,18 @@ function stateClicked(stateID) {
 
     currentViewLevel = "state";
     lastSelectedState = stateName;
-    lastSelectedDistrict = null;  // Reset district when clicking a state
+    lastSelectedDistrict = null;
 
     updateButtonVisibility(true, false);
     console.log("State clicked:", stateAbbr);
 
     updateMemberProfile(stateName);
-    console.log("Calling updateMemberProfile for:", stateName);
-
-    // Load members and radar chart data (if selected)
-    if (document.querySelector(`[onclick="loadTab('radar-chart')"].active`)) {
+    
+    if (window.selectedMemberID) {
         updateRadarChart(window.selectedMemberID);
     }
+
+    addStateOverlay(stateFeature);
 }
 
 // Function to zoom into a district
@@ -247,57 +333,36 @@ function districtClicked(districtID) {
     let latCenter = (minLat + maxLat) / 2;
     let optimalScale = calculateZoom(minLon, maxLon, minLat, maxLat);
 
-    let stateAbbr = districtFeature.properties.OFFICE_ID.slice(0, 2);
-
-    // Get current trace index of districts
-    let plotData = document.getElementById("plotly-map").data;
-    let districtTraceIndex = plotData.findIndex(trace => trace.featureidkey === "properties.OFFICE_ID");
-
-    if (districtTraceIndex === -1) {
-        console.error("District trace not found.");
-        return;
-    }
-
-    if (lastSelectedDistrict !== null && lastSelectedDistrict !== districtID) {
-        console.log(`Restoring previous district: ${lastSelectedDistrict}`);
-        let previousValues = stateDistricts.map(d => d.properties.PARTY === "R" ? 1 : 0);
-        Plotly.restyle("plotly-map", { z: [previousValues] }, [districtTraceIndex]);
-    }
-
-    let newZValues = stateDistricts.map(d =>
-        d.properties.OFFICE_ID === districtID ? 0.5 : (d.properties.PARTY === "R" ? 1 : 0)
-    );
-    console.log("New Z values:", newZValues);
-    Plotly.restyle("plotly-map", { z: [newZValues] }, [districtTraceIndex]);
-
     Plotly.relayout("plotly-map", {
         "geo.center": { lon: lonCenter, lat: latCenter },
-        "geo.projection.scale": optimalScale
+        "geo.projection.scale": optimalScale,
     });
 
     currentViewLevel = "district";
     lastSelectedDistrict = districtID;
     updateButtonVisibility(false, true);
 
-    // Load members and radar chart data (if selected)
-    if (document.querySelector(`[onclick="loadTab('members')"].active`)) {
-        console.log("Calling updateMemberProfile for district:", stateAbbr, lastSelectedDistrict.slice(-2));
-        updateMemberProfile(lastSelectedState, lastSelectedDistrict.slice(-2));
-    }
-    if (document.querySelector(`[onclick="loadTab('radar-chart')"].active`)) {
+    let districtNumber = districtFeature.properties.DISTRICT || lastSelectedDistrict.slice(-2);
+    updateMemberProfile(lastSelectedState, districtNumber);
+
+    if (window.selectedMemberID) {
         updateRadarChart(window.selectedMemberID);
     }
+
+    updateDistrictOverlay(districtFeature);
 }
 
 // Function to reset to national view
 function resetView() {
+    document.getElementById("map-header").innerText = "Select Your State / District";
+    document.getElementById("member-header").innerText = "Member Information";
+
     Plotly.relayout("plotly-map", {
         "geo.center.lon": -95.7129,
         "geo.center.lat": 37.0902,
         "geo.projection.scale": 0.9
     });
 
-    // Clear all district traces
     let numTraces = document.getElementById("plotly-map").data.length;
     if (numTraces > 1) {
         for (let i = numTraces - 1; i >= 1; i--) {
@@ -305,11 +370,13 @@ function resetView() {
         }
     }
 
+    // Remove any state or district overlays
+    removeDistrictOverlays();
+    
     currentViewLevel = "national";
     lastSelectedState = null;
     updateButtonVisibility(false, false);
 
-    // Reset sidebar content to the original welcome message
     const sidebarContent = document.getElementById("member-details");
     if (sidebarContent) {
         sidebarContent.innerHTML = "";
@@ -333,7 +400,6 @@ function backToStateView() {
         "geo.projection.scale": optimalScale
     });
 
-    // Restore state trace visibility
     Plotly.restyle("plotly-map", { visible: true });
 
     let originalValues = stateDistricts.map(d => d.properties.PARTY === "R" ? 1 : 0);
@@ -345,23 +411,21 @@ function backToStateView() {
     lastSelectedDistrict = null;
     updateButtonVisibility(true, false);
 
-    // Reset the sidebar to show all members of the state
     updateMemberProfile(lastSelectedState);
 }
 
-// Function to calculate geometric center of a feature
 function getGeoBounds(geometry) {
     if (!geometry || !geometry.coordinates) {
         console.error("Invalid geometry:", geometry);
-        return [0, 0];  // Default to center of the map
+        return { minLon: 0, maxLon: 0, minLat: 0, maxLat: 0 };
     }
 
     let allCoords = geometry.type === "MultiPolygon"
-        ? geometry.coordinates.flat(2)  // Flatten multi-polygons
-        : geometry.coordinates[0]; // Single polygon
+        ? geometry.coordinates.flat(2)
+        : geometry.coordinates[0];
 
-    let lats = allCoords.map(c => c[1]);  // Extract latitudes
-    let lons = allCoords.map(c => c[0]);  // Extract longitudes
+    let lats = allCoords.map(c => c[1]);
+    let lons = allCoords.map(c => c[0]);
 
     let minLon = Math.min(...lons);
     let maxLon = Math.max(...lons);
@@ -379,22 +443,17 @@ function calculateZoom(minLon, maxLon, minLat, maxLat) {
     let scaleFactor = Math.max(lonDiff, latDiff) * 0.1;
     let optimalScale;
 
-    // Dynamically adjust zoom based on state size
     if (lonDiff > 15 || latDiff > 10) {
-        // Large states
         optimalScale = baseScale - (scaleFactor * 1.65);
     } else if (lonDiff > 5 || latDiff > 5) {
-        // Medium states
         optimalScale = baseScale - scaleFactor;
     } else {
-        // Small states
         optimalScale = baseScale - (scaleFactor * 0.7);
     }
 
     return Math.max(2, Math.min(optimalScale, 6));
 }
 
-// Function to update button visibility
 function updateButtonVisibility(showBackToNational, showBackToState) {
     document.getElementById("backToNationalView").style.display = showBackToNational ? "block" : "none";
     document.getElementById("backToStateView").style.display = showBackToState ? "block" : "none";

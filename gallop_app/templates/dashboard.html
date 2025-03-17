@@ -6,177 +6,91 @@
     <title>Gallop</title>
 
     <!-- Link External CSS -->
-     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    
     <!-- Include Plotly.js -->
     <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
     <!-- Include TopoJSON -->
     <script src="https://d3js.org/topojson.v3.min.js"></script>
     <!-- Include D3 Library -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    
     <!-- Link JavaScript Files -->
     <script src="{% static 'js/membersProfile.js' %}"></script>
     <script src="{% static 'js/congress_map.js' %}"></script>
     <script src="{% static 'js/radarChart.js' %}"></script>
-    <!-- Remove the old radarChartInfo.js -->
     <script src="{% static 'js/radarChartD3Implementation.js' %}"></script>
     <script src="{% static 'js/ideologyChart.js' %}"></script>
-    <script src="{% static 'js/tabs.js' %}"></script>
-    
 </head>
 <body>
     <!-- Main Header (Video Version) -->
     <header class="main-header" style="text-align: center;">
         <video autoplay loop muted playsinline width="850" height="150" style="display: block; margin: 0 auto;">
-          <source src="{% static 'videos/Gallop_MVP_Header.mp4' %}" type="video/mp4">
-          Your browser does not support the video tag.
+            <source src="{% static 'videos/Gallop_MVP_Header.mp4' %}" type="video/mp4">
+            Your browser does not support the video tag.
         </video>
-      </header>
+    </header>
 
+    <!-- Dashboard Container with Grid Layout -->
     <div class="dashboard-container">
-        <!-- Dashboard Header -->
-        <div class="dashboard-header">
-            <div class="header-left">Congressional Dashboard</div>
-            <div class="header-right">
-                Welcome! Find information about your state and elected officials here.
-            </div>
-        </div>
-
-        <!-- Tabs for Sidebar Navigation -->
-        <div class="tabs">
-            <button data-tab="general" onclick="loadTab('general')" class="active">General</button>
-            <button data-tab="members" onclick="loadTab('members')">Members</button>
-            <button data-tab="radar-chart" onclick="loadTab('radar-chart')">Radar Chart</button>
-            <button data-tab="ideology-chart" onclick="loadTab('ideology-chart')">Ideology Chart</button>
-        </div>
-
-        <!-- Main Layout -->
-        <div class="main-container">
-            <!-- Map Container -->
-            <div id="map-container">
-                <div id="map-buttons">
-                    <button id="backToNationalView" class="back-button" onclick="resetView()" style="display: none;"><- Back to National View</button>
-                    <button id="backToStateView" class="back-button" onclick="backToStateView()" style="display: none;"><- Back to State View</button>
+        <div class="grid-layout">
+            <!-- Top Row -->
+            <!-- Map Panel with fixed header -->
+            <div id="map-container" class="grid-item">
+                <div class="box-header" id="map-header">Select Your State / District</div>
+                <div id="plotly-map-container">
+                    <div id="map-buttons">
+                        <button id="backToNationalView" class="back-button" onclick="resetView()" style="display: none;">&larr; Back to National View</button>
+                        <button id="backToStateView" class="back-button" onclick="backToStateView()" style="display: none;">&larr; Back to State View</button>
+                    </div>
+                    <div id="plotly-map"></div>
                 </div>
-                <div id="plotly-map"></div>
             </div>
 
-            <!-- Sidebar for Dynamic Content -->
-            <div id="sidebar">
-                <div id="general-container" class="tab-container">
-                    <h2 id="general-title">General Information</h2>
-                    <div id="general-content">
-                        <p>
-                            This interactive dashboard provides insights into the U.S. Congress by visualizing
-                            data about representatives, legislation, and political trends. Use the navigation
-                            tabs at the top to explore different aspects of congressional data.
-                        </p>
-
-                        <h3>How to Use the Dashboard</h3>
-                        <u1>
-                            <strong>Select a State:</strong> Click a state on the map to view its congressional members.
-                            <strong>Select a District:</strong> Zoom into a state and click on a district to see specific representatives.<br>
-                            <strong>Use the Tabs:</strong> Switch between different views using the navigation buttons at the top.
-                        </u1>
-
-                        <h3>Dashboard Features</h3>
-                        <u1>
-                            <strong>Map:</strong> Click on a state to view its congressional representatives.<br>
-                            <strong>Members:</strong> View detailed information about individual members of Congress.<br>
-                            <strong>Radar Chart:</strong> Compare the voting patterns and legislative priorities of selected members.<br>
-                            <strong>Ideology Chart:</strong> Analyze congressional trends on key political topics and compare states.<br>
-                        </u1>
-
-                        <p><em>Select a state from the map or explore the tabs to get started!</em></p>
+            <!-- Members Panel with fixed header -->
+            <div id="members-container" class="grid-item">
+                <div class="box-header" id="member-header">Member Information</div>
+                <div id="member-content">
+                    <div id="member-details">
+                        <p>Select a state on the map to view member information.</p>
                     </div>
                 </div>
+            </div>
 
-                <!-- Members Container -->
-                <div id="members-container" class="tab-container" style="display: none;">
-                    <h2 id="members-title">Member Information</h2>
-                    <div id="members-content">
-                        <p>Select a state from the map to view member information.</p>
-                    </div>
-                    <div id="sidebar-content">
-                        <div id="member-details"></div>
-                    </div>
-                </div>
-                
-
-                <!-- Radar Chart Container -->
-                <div id="radar-chart-container" class="tab-container" style="display: none;">
-                    <h2 id="radar-chart-title">Congress Members Radar Chart</h2>
-
-                    <!-- Radar Chart Controls -->
-                    <div id="controls">
-                        <!-- Member Selection Dropdown -->
-                         <label for="radar-member-select">Select a Member:</label>
-                         <select id="radar-member-select">
-                            <option value="">-- Select a Member --</option>
-                         </select>
-
-                        <!-- Toggle for Self Proportion vs Across All Proportion -->
-                        <div class="toggle-controls">
-                            <label>
-                                <input type="radio" name="proportion-toggle" value="self" checked>
-                                Self Proportion
-                            </label>
-                            <label>
-                                <input type="radio" name="proportion-toggle" value="across_all">
-                                Across All Proportion
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Radar Chart -->
-                    <div id="radar-chart"></div>
-                </div>
-
-                <!-- Ideology Chart Container -->
-                <div id="ideology-chart-container" class="tab-container" style="display: none;">
-                    <h2>Congress Members Ideology Chart</h2>
-
-                    <label for="topic-select">Select Topic:</label>
-                    <select id="topic-select">
-                        <option value="">-- Select a Topic --</option>
+            <!-- Bottom Row -->
+            <div id="radar-chart-container" class="grid-item">
+                <h2 id="radar-chart-title">Congress Members Radar Chart</h2>
+                <!-- Radar Chart Controls -->
+                <div id="controls">
+                    <label for="radar-member-select">Select a Member:</label>
+                    <select id="radar-member-select">
+                        <option value="">-- Select a Member --</option>
                     </select>
-                    <div id="ideology-chart"></div>
+                    <div class="toggle-controls">
+                        <label>
+                            <input type="radio" name="proportion-toggle" value="self" checked>
+                            Self Proportion
+                        </label>
+                        <label>
+                            <input type="radio" name="proportion-toggle" value="across_all">
+                            Across All Proportion
+                        </label>
+                    </div>
                 </div>
+                <div id="radar-chart"></div>
+            </div>
+            <div id="ideology-chart-container" class="grid-item">
+                <h2>Congress Members Ideology Chart</h2>
+                <label for="topic-select">Select Topic:</label>
+                <select id="topic-select">
+                    <option value="">-- Select a Topic --</option>
+                </select>
+                <div id="ideology-chart"></div>
             </div>
         </div>
     </div>
-
-    <!-- New Containers Below -->
-<div class="dashboard-container">
-    <div class="main-container">
-        <!-- First Content Section -->
-        <div class="content-section" style="width: 50%;">
-            <img src="{% static '/image.jpg' %}" alt="Placeholder Image" style="width: 100%; height: auto; border-radius: 8px;">
-        </div>
-
-        <!-- Second Content Section -->
-        <div class="content-section" style="width: 50%;">
-            <img src="{% static '/image.jpg' %}" alt="Placeholder Image" style="width: 100%; height: auto; border-radius: 8px;">
-        </div>
-    </div>
-</div>
-
-<div class="dashboard-container">
-    <div class="main-container">
-        <!-- First Content Section -->
-        <div class="content-section" style="width: 50%;">
-            <img src="{% static '/image.jpg' %}" alt="Placeholder Image" style="width: 100%; height: auto; border-radius: 8px;">
-        </div>
-
-        <!-- Second Content Section -->
-        <div class="content-section" style="width: 50%;">
-            <img src="{% static '/image.jpg' %}" alt="Placeholder Image" style="width: 100%; height: auto; border-radius: 8px;">
-        </div>
-    </div>
-</div>
-
-
-
-
+    
+    <!-- (Optional) Remove any old container blocks that are no longer needed -->
+    
 </body>
 </html>

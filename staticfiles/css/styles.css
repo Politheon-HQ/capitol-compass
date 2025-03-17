@@ -3,7 +3,6 @@
 ================================= */
 body {
     font-family: Arial, sans-serif;
-    /*background-color: #f8f9fa*/
 }
 
 /* ==============================
@@ -31,7 +30,7 @@ body {
 }
 
 /* ==============================
-    Layout & Structure
+    Dashboard Container
 ================================= */
 .dashboard-container {
     max-width: 1400px;
@@ -43,20 +42,50 @@ body {
 }
 
 /* ==============================
-    Main Dahsboard Layout
+    Grid Layout for Static Dashboard
+    Two rows: Top row fixed (map & members), bottom row auto (charts)
 ================================= */
-.main-container {
-    display: flex;
+.grid-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 600px auto; /* Top row fixed; Bottom row auto */
     gap: 10px;
+    padding: 10px;
 }
 
-/* Map Section */
-#map-container {
-    position: relative;
-    width:60%;
-    height: 600px;
+/* All grid items share a common style */
+.grid-item {
     border-radius: 8px;
     background-color: #f4f4f4;
+    overflow: hidden;
+    position: relative;
+}
+
+/* ==============================
+    Box Header for Panels
+================================= */
+.box-header {
+    background-color: #003366;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 10px;
+    text-align: center;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+/* ==============================
+    Map Panel Structure
+================================= */
+#map-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+#plotly-map-container {
+    flex: 1;
+    position: relative;
     overflow: hidden;
 }
 
@@ -66,64 +95,11 @@ body {
     position: relative;
 }
 
-.plot-container {
-    background: transparent !important
-}
-
-.js-plotly-plot {
-    background: transparent !important
-}
-
-svg.main-container {
-    background: transparent !important
-}
-
-.choroplethlocation {
-    fill-opacity: 1 !important;
-    opacity: 1 !important;
-}
-
-/* Sidebar */
-#sidebar {
-    width: 40%;
-    background-color: #f4f4f4;
-    padding: 15px;
-    border-radius: 8px;
-}
-
-/* Sidebar Content */
-#sidebar-content {
-    padding: 10px;
-    border-radius: 5px;
-}
-
-/* ==============================
-    Tabs Styling
-================================= */
-.tabs {
-    display: flex;
-    justify-content: flex-start;
-    padding: 8px;
-    gap: 10px;
-}
-
-.tabs button {
-    padding: 10px 15px;
-    cursor: pointer;
-    border: none;
-    background-color: #ddd;
-    font-size: 14px;
-}
-
-.tabs button.active {
-    background-color: #003366;
-    color: white;
-}
-
+/* Map Buttons */
 #map-buttons {
     position: absolute;
     top: 10px;
-    left: 100px;
+    left: 50%;
     transform: translateX(-50%);
     display: flex;
     gap: 10px;
@@ -142,38 +118,29 @@ svg.main-container {
 }
 
 /* ==============================
-    Members Profile Styling
+    Members Panel Structure
 ================================= */
-/* Default: No border when empty */
+#members-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+#member-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+/* Members Profile Styling */
 #member-details {
+    /* The header is now separated; member-details is solely for content */
     border: none;
 }
 
-/* Show border when content exists */
 #member-details.has-content {
-    display: flex;
-    flex-direction: column;
-    max-height: 80vh;
-    overflow-y: auto;
     border: 2px solid #5c5252;
-    padding: 10px;
     border-radius: 5px;
     background-color: #aeafaf;
-}
-
-#member-details h4 {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    margin-bottom: 5px;
-    margin-top: 5px;
-    padding: 5px 0;
-}
-
-#members-content {
-    font-size: 16px;
-    font-weight: normal;
 }
 
 .member-profile {
@@ -206,33 +173,27 @@ svg.main-container {
 
 .left-column {
     flex: 1;
-    padding-right: 1px;
-    margin-right: 0;
     text-align: left;
-    width: 50%;
 }
 
 .right-column {
-    width: 50%;
+    flex-basis: 50%;
 }
 
 /* ==============================
-    Radar Chart Styling
+    Radar Chart Container
 ================================= */
 #radar-chart-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 100%;
-    height: auto;
-    overflow: hidden;
-    margin: 0 auto;
+    padding: 10px;
 }
 
 #radar-chart {
     width: 100%;
-    height: 100%;
+    height: 400px; /* Adjust height as needed */
 }
 
 #controls {
@@ -240,6 +201,7 @@ svg.main-container {
     flex-direction: column;
     gap: 10px;
     margin-bottom: 10px;
+    width: 100%;
 }
 
 #radar-member-select {
@@ -252,7 +214,7 @@ svg.main-container {
 }
 
 /* ==============================
-    Ideology Chart Styling
+    Ideology Chart Container
 ================================= */
 #ideology-chart-container {
     display: flex;
@@ -260,8 +222,7 @@ svg.main-container {
     align-items: center;
     justify-content: center;
     gap: 10px;
-    height: 100%;
-    margin-bottom: 8px;
+    padding: 10px;
 }
 
 #topic-select {
@@ -281,8 +242,67 @@ svg.main-container {
     border-radius: 8px;
 }
 
-
-
 /* ==============================
-    Extra Containers (Picture Sections)
+    Responsive Adjustments
 ================================= */
+@media (max-width: 800px) {
+    .grid-layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: 600px auto auto;
+    }
+}
+
+/* Remove or override the border on the overall dashboard container if needed */
+.dashboard-container {
+    max-width: 1400px;
+    margin: 10px auto;
+    /* Remove the border if you only want the top boxes to show a border */
+    border: none;
+    /* Optionally, keep a subtle shadow for the overall container */
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Special border for the top two grid items (map and members panels) */
+.grid-layout > .grid-item:nth-child(-n+2) {
+    border: 2px solid #003366; /* Blue border */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+/* Optional: Remove the special border from the bottom grid items if present */
+.grid-layout > .grid-item:nth-child(n+3) {
+    border: none;
+}
+
+.member-profile {
+    cursor: pointer;
+    transition: background-color 0.3s, border 0.3s;
+}
+
+.member-profile.highlight {
+    border: 2px solid #ff9800;  /* Modern orange highlight for district match */
+    background-color: #fff3e0;   /* Light, subtle background */
+}
+
+/* Special styling for senators */
+.member-profile.senator {
+    border: 2px dashed #4caf50;  /* Dashed green border for senators */
+    background-color: #e8f5e9;    /* Light green background */
+}
+
+/* When a senator is highlighted by district, district highlight takes precedence */
+.member-profile.senator.highlight {
+    border: 2px solid #ff9800;
+    background-color: #fff3e0;
+}
+
+.member-profile.selected-member {
+    border: 2px solid gold;
+    background-color: #fff8e1; /* Optional: a light golden background */
+}
+
+/* When a senator is selected, district highlight takes precedence */
+.member-profile.senator.selected-member,
+.member-profile.senator.highlight {
+    border: 2px solid gold;
+    background-color: #fff8e1;
+}
