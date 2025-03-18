@@ -121,7 +121,8 @@ function renderMemberList(members) {
         rightColumn.innerHTML = `
             <span><strong>Address:</strong> ${member.address}</span><br>
             <span><strong>Phone:</strong> ${member.phone_number}</span><br>
-            <span><strong>Website:</strong> <a href="${member.website_url}" target="_blank">${member.websiteURL}</a></span><br>
+            <span><strong>Website:</strong> <a href="${member.website_url}" target="_blank">${member.website_url}</a></span><br>
+            <span><strong>Committee Assignments:</strong> ${member.committee_assignments}</span><br>
         `;
 
         // Click event to open Radar Chart
