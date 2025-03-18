@@ -1,19 +1,6 @@
 from django.db import models
 
-# Create your models here.
-class USState(models.Model):
-    state_name = models.CharField(max_length=100, primary_key=True)
-    state_abbr = models.CharField(max_length=10, unique=True)
-    state_type = models.CharField(max_length=50)
-    state_properties = models.JSONField()
-    arcs = models.JSONField()
-
-    class Meta:
-        db_table = "us_states"
-
-    def __str__(self):
-        return self.state_name
-    
+# Create your models here
 class USStateTopojson(models.Model):
     topojson = models.JSONField()
 
@@ -23,20 +10,6 @@ class USStateTopojson(models.Model):
     def __str__(self):
         return self.id
 
-class CongressionalDistrict(models.Model):
-    office_id = models.CharField(max_length=10, primary_key=True)
-    state_abbr = models.CharField(max_length=10)
-    district_number = models.IntegerField()
-    district_type = models.CharField(max_length=50)
-    properties = models.JSONField()
-    arcs = models.JSONField()
-
-    class Meta:
-        db_table = "congressional_districts"
-
-    def __str__(self):
-        return f"{self.state_abbr} - {self.district_number} ({self.district_type})"
-    
 class USDistrictTopojson(models.Model):
     topojson = models.JSONField()
 
@@ -61,6 +34,7 @@ class CongressMembers(models.Model):
     phone_number = models.CharField(max_length=20)
     sponsored_bills = models.IntegerField()
     cosponsored_bills = models.IntegerField()
+    committee_assignments = models.TextField(default="Unknown", blank=True)
 
     class Meta: 
         db_table = "congress_members"

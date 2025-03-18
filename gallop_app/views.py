@@ -3,30 +3,13 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-from .utils import convert_to_topojson_states, convert_to_topojson_districts, get_cached_data
-from .models import USState, CongressionalDistrict, CongressMembers, CongressMembersWithProportions, CombinedData, USStateTopojson, USDistrictTopojson
-from .serializers import USStateSerializer, CongressionalDistrictSerializer, CongressMembersSerializer, CongressMembersWithProportionsSerializer, CombinedDataSerializer, USStateTopojsonSerializer, USDistrictTopojsonSerializer
+from .utils import get_cached_data
+from .models import CongressMembers, CongressMembersWithProportions, CombinedData, USStateTopojson, USDistrictTopojson
+from .serializers import CongressMembersSerializer, CongressMembersWithProportionsSerializer, CombinedDataSerializer, USStateTopojsonSerializer, USDistrictTopojsonSerializer
 
 # Create your views here.
 def dashboard_view(request):
     return render(request, 'dashboard.html')
-
-class USStateViewSet(APIView):
-    def get(self, request):
-        queryset = USState.objects.all()
-        serializer = USStateSerializer(queryset, many=True)
-
-        filtered_data = [
-            {
-                "type": state["state_type"],
-                "properties": state["state_properties"],
-                "arcs": state["arcs"],
-            }
-            for state in serializer.data
-        ]
-
-        topojson = convert_to_topojson_states(filtered_data)
-        return Response(topojson)
     
 class USStateTopoViewSet(APIView):
     def get(self, request, *args, **kwargs):
@@ -57,7 +40,7 @@ class USStateTopoViewSet(APIView):
         """
         Allows inserting a new TopoJSON entry via POST request.
         """
-        serializer = USStateSerializer(data=request.data)
+        serializer = USStateTopojsonSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer, status=status.HTTP_201_CREATED)
@@ -98,26 +81,6 @@ class USDistrictTopoViewSet(APIView):
             return Response(serializer, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class CongressionalDistrictViewSet(APIView):
-    def get(self, request):
-        queryset = CongressionalDistrict.objects.all()
-        serializer = CongressionalDistrictSerializer(queryset, many=True)
-
-        filtered_data = [
-            {
-                "type": district["district_type"],
-                "properties": district["properties"],
-                "arcs": district["arcs"],
-            }
-            for district in serializer.data
-        ]
-
-        topojson = convert_to_topojson_districts(filtered_data)
-        return Response(topojson)
-    
-class USStateTopojsonViewSet(viewsets.ModelViewSet):
-    queryset = USStateTopojson.objects.all()
-    serializer_class = USStateTopojsonSerializer
 
 class CongressMembersViewSet(viewsets.ModelViewSet):
     queryset = CongressMembers.objects.all()
