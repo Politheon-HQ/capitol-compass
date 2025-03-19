@@ -1,6 +1,9 @@
 // radarChartD3Implementation.js
 
-// 1) Define your policy areas just like the old code had
+// ------------------------------
+// RADAR CHART IMPLEMENTATION
+// ------------------------------
+
 const policyAreas = [
   {
     display: "Agriculture and Food",
@@ -88,30 +91,23 @@ const policyAreas = [
   }
 ];
 
-// If you have any “special” scaling for certain chambers:
 const SCALING_FACTORS = {
   "Senate": 2,
   "House of Representatives": 5
 };
 
-let globalMembersData = [];         // We'll store the API data here
-let radarChartInitialized = false;  // Flag to check if chart is first drawn
+let globalMembersData = [];         // API data will be stored here
+let radarChartInitialized = false;  // Flag for first draw
 
-// RadarChart default config
 const radarChartOptions = {
   w: 450,
   h: 450,
   margin: { top: 50, right: 60, bottom: 50, left: 60 },
   levels: 5,
   roundStrokes: true,
-  transitionDuration: 800 // Feel free to adjust the duration
+  transitionDuration: 800
 };
 
-/**
- * Creates the actual dataset arrays that `radarChart.js` expects.
- * dataSet[0] = array of {axis, value} for the Member
- * dataSet[1] = array of {axis, value} for the State
- */
 function buildRadarDataset(member, proportionType) {
   const dataset = [[], []]; // [memberData[], stateData[]]
 
@@ -122,10 +118,8 @@ function buildRadarDataset(member, proportionType) {
     const stField = (proportionType === 'self') ? area.state_self : area.state_national;
     let stVal = parseFloat(member[stField]) || 0;
 
-    // Log each area value to see what is coming in
     console.log(`${area.display}: member value = ${memVal}, state value = ${stVal}`);
 
-    // Apply chamber-specific scaling if needed:
     if (proportionType === 'across_all') {
       const scalingFactor = SCALING_FACTORS[member.chamber] || 1;
       memVal *= scalingFactor;
@@ -135,18 +129,12 @@ function buildRadarDataset(member, proportionType) {
     dataset[1].push({ axis: area.display, value: stVal });
   });
 
-  // Assign fixed indices for the color scale:
   dataset[0].index = 0;
   dataset[1].index = 1;
 
   return dataset;
 }
 
-
-
-/**
- * Initializes the dropdown for radar chart members.
- */
 function initRadarDropdown(members) {
   console.log("Initializing radar dropdown with members:", members);
   const dropdown = document.getElementById("radar-member-select");
@@ -164,36 +152,44 @@ function initRadarDropdown(members) {
   });
 }
 
-/**
-* Renders or updates the radar chart.
-*/
 function renderRadarChart(bioguideId, proportionType) {
   const member = globalMembersData.find(d => d.bioguide_id === bioguideId);
   if (!member) {
     console.warn("No member found with ID:", bioguideId);
     return;
   }
-  console.log("Selected member:", member);  // <-- Logging the selected member
+  console.log("Selected member:", member);
 
-  // Build the data array for RadarChart
   const dataForRadar = buildRadarDataset(member, proportionType);
-  console.log("Data for Radar:", dataForRadar);  // <-- Logging the built dataset
+  console.log("Data for Radar:", dataForRadar);
 
-  // First time? Create the chart from scratch
   if (!radarChartInitialized) {
     RadarChart("#radar-chart", dataForRadar, radarChartOptions);
     radarChartInitialized = true;
   } else {
-    // Already drawn? Smoothly update with transitions
     RadarChart.update(dataForRadar);
   }
 }
 
-/**
-* DOMContentLoaded: Fetch API data, initialize dropdown, and wire up events.
-*/
+// ------------------------------
+// NEW GLOBAL UPDATE FUNCTION
+// ------------------------------
+
+// This function updates the radar chart using the currently selected member.
+// It reads the current proportion toggle and then calls renderRadarChart.
+function updateRadarChart(memberId) {
+  if (!memberId) {
+    console.warn("No member selected for the radar chart.");
+    return;
+  }
+  const proportionType = document.querySelector('input[name="proportion-toggle"]:checked')?.value || "self";
+  renderRadarChart(memberId, proportionType);
+}
+
+// ------------------------------
+// DOMContentLoaded: Setup and Wiring
+// ------------------------------
 document.addEventListener("DOMContentLoaded", function() {
-  // Replace the CSV fetch with an API call
   fetch("/api/member_proportions/")
     .then(response => {
         if (!response.ok) throw new Error("Failed to fetch API data.");
@@ -201,11 +197,8 @@ document.addEventListener("DOMContentLoaded", function() {
     })
     .then(apiData => {
         globalMembersData = apiData;
-
-        // Initialize the dropdown using the new function
         initRadarDropdown(globalMembersData);
 
-        // Change event for the dropdown
         const dropdown = document.getElementById("radar-member-select");
         dropdown.addEventListener("change", function() {
             const selectedID = this.value;
@@ -214,7 +207,6 @@ document.addEventListener("DOMContentLoaded", function() {
             renderRadarChart(selectedID, proportionType);
         });
 
-        // Change events for the radio buttons (for toggling between 'self' and 'across_all')
         const radios = document.querySelectorAll('input[name="proportion-toggle"]');
         radios.forEach(radio => {
             radio.addEventListener("change", function() {
@@ -225,7 +217,6 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         });
 
-        // Optionally auto-select the first member if available
         if (globalMembersData.length > 0) {
             dropdown.value = globalMembersData[0].bioguide_id;
             renderRadarChart(globalMembersData[0].bioguide_id, "self");
