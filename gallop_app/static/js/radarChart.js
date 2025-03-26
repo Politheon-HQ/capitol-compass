@@ -52,6 +52,13 @@ function RadarChart(id, data, options = {}) {
         .range([0, radius])
         .domain([0, maxValue]);
 
+    /////////////// CUSTOM LABEL COLOR SCALE ////////////////////////
+    // This scale assigns a distinct color to each policy area label.
+    // Using d3.schemeSet3 (which provides up to 12 distinct colors) as an example.
+    const labelColorScale = d3.scaleOrdinal()
+          .domain(allAxis)
+          .range(d3.schemeCategory10);
+
     /////////////// INITIAL SVG SETUP ////////////////////////
     // Remove any existing SVG in the target element.
     d3.select(id).select("svg").remove();
@@ -127,12 +134,12 @@ function RadarChart(id, data, options = {}) {
         .style("stroke", "white")
         .style("stroke-width", "2px");
 
-    // Append the axis labels.
+    // Append the axis labels with custom text color.
     axis.append("text")
         .attr("class", "legend")
         .style("font-size", "11px")
         .style("font-weight", "bold")
-        .style("fill", "#444")
+        .style("fill", d => labelColorScale(d))  // Custom label color based on policy area.
         .attr("text-anchor", "middle")
         .attr("dy", "0.35em")
         .attr("x", (d, i) => rScale(maxValue * cfg.labelFactor) * Math.cos(angleSlice * i - Math.PI / 2))
