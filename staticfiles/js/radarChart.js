@@ -59,13 +59,13 @@ function RadarChart(id, data, options = {}) {
     // Create the main SVG element.
     const svg = d3.select(id).append("svg")
         .attr("width", cfg.w + cfg.margin.left + cfg.margin.right)
-        .attr("height", cfg.h + cfg.margin.top + cfg.margin.bottom)
+        .attr("height", cfg.h + cfg.margin.top + cfg.margin.bottom + 10)
         .attr("class", "radar" + id);
 
     // Append a group element to center the chart.
     const g = svg.append("g")
         .attr("class", "radarChartGroup")
-        .attr("transform", `translate(${(cfg.w / 2) + cfg.margin.left}, ${(cfg.h / 2) + cfg.margin.top})`);
+        .attr("transform", `translate(${(cfg.w / 2) + cfg.margin.left + 50}, ${(cfg.h / 2) + cfg.margin.top})`);
 
     /////////////// GLOW FILTER (OPTIONAL) /////////////////
     // Define a glow filter to add a soft blur effect around elements.

@@ -64,10 +64,11 @@ async function updateMemberProfile(stateID, districtNumber = null) {
   if (districtNumber != null) {
     titleHTML += ` - District ${formatDistrict(districtNumber)}`;
   }
-  const titleElement = document.createElement("h4");
-  titleElement.id = "member-title";
-  titleElement.textContent = titleHTML;
-  memberDetails.appendChild(titleElement);
+
+  //const titleElement = document.createElement("h4");
+  //titleElement.id = "member-title";
+  //titleElement.textContent = titleHTML;
+  //memberDetails.appendChild(titleElement);
 
   // Filter for members in the selected state
   const stateMembers = window.membersData.filter(member => member.state === stateID);
