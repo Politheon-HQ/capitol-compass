@@ -17,6 +17,12 @@ body {
     border-bottom: 2px solid #ccc;
 }
 
+.main-header video {
+    width: 100%;      /* Stretches the video to the full width of its container */
+    height: auto;     /* Maintains the aspect ratio */
+    object-fit: cover; /* Optional: Ensures the video covers the container without distortion */
+}
+
 /* ==============================
     Dashboard Header (Top Section)
 ================================= */
