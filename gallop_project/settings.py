@@ -14,9 +14,12 @@ from pathlib import Path
 import os
 import django_heroku
 import django_redis
+import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 
 # Quick-start development settings - unsuitable for production
@@ -29,6 +32,15 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = ["https://gallop-f748892b3829.herokuapp.com", "localhost", "127.0.0.1"]
+
+# Redis for Celery
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+
+# Celery Configuration
+CELERY_BROKER_URL = REDIS_URL
+CELERY_RESULT_BACKEND = REDIS_URL
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'application/json'
 
 
 # Application definition

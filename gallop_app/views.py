@@ -1,9 +1,10 @@
 from django.shortcuts import render
 from rest_framework import viewsets
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-from .utils import get_cached_data
+from .utils import get_cached_data, get_ideology_data_for_topic, get_ideology_topics
 from .models import CongressMembers, CongressMembersWithProportions, CombinedData, USStateTopojson, USDistrictTopojson
 from .serializers import CongressMembersSerializer, CongressMembersWithProportionsSerializer, CombinedDataSerializer, USStateTopojsonSerializer, USDistrictTopojsonSerializer
 
@@ -116,7 +117,8 @@ class CombinedDataViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         def fetch_combined_data():
-            return list(self.queryset.values())
+            serializer = self.get_serializer(self.queryset, many=True)
+            return serializer.data
         
         cached_data = get_cached_data("combined_data", fetch_combined_data)
         if cached_data:
@@ -125,4 +127,26 @@ class CombinedDataViewSet(viewsets.ModelViewSet):
             return Response({"error": "No data found"}, status=status.HTTP_404_NOT_FOUND)
 
     
+@api_view(['GET'])
+def ideology_by_topic(request, topic):
+    """
+    Return cached ideology data for a specific topic.
+    If not in cache, it will be computed and stored.
+    """
+    data = get_ideology_data_for_topic(topic)
+    if not data:
+        return Response({"message": "No data found for topic."}, status=status.HTTP_404_NOT_FOUND)
     
+    return Response(data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def ideology_topics(request):
+    """
+    Return cached list of ideology topics.
+    If not in cache, it will be computed and stored.
+    """
+    data = get_ideology_topics()
+    if not data:
+        return Response({"message": "No data found for topics."}, status=status.HTTP_404_NOT_FOUND)
+    
+    return Response(data, status=status.HTTP_200_OK)
