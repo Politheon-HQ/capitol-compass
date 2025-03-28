@@ -1,56 +1,24 @@
 // Global variable to store ideology data
-window.ideologyData = [];
 window.ideologyTopics = [];
 
 // API Endpoint
-const IDEOLOGY_API = "/api/combined_data/";
+const TOPICS_API = "/api/ideology_topics/";
+const IDEOLOGY_API = "/api/ideology_data_by_topic/";
 
 // Function to fetch data from API with caching
-async function fetchIdeologyData() {
+async function fetchIdeologyTopics() {
     try {
-        console.log("Fetching new ideology data from API...");
-        const response = await fetch(IDEOLOGY_API);
-        if (!response.ok) throw new Error(`Failed to fetch data from ${IDEOLOGY_API}`);
+        const response = await fetch(TOPICS_API);
+        if (!response.ok) throw new Error("Failed to fetch data.");
 
-        const data = await response.json();
-        console.log("Fetched data:", data);
-
-        // Extract unique topics
-        let topics = new Set();
-        data.forEach(d => {
-            if (d.assigned_label) {
-                try {
-                    let labels;
-
-                    if (Array.isArray(d.assigned_label)) {
-                        labels = d.assigned_label;
-                    } else if (typeof d.assigned_label === 'string') {
-                        let fixed_string = d.assigned_label.replace(/'/g, '"');
-                        labels = JSON.parse(fixed_string);
-                    } else {
-                        throw new Error("Invalid assigned_label format");
-                    }
-
-                    if (Array.isArray(labels)) {
-                        labels.forEach(topic => topics.add(topic));
-                    }
-                } catch (error) {
-                    console.error("Error parsing assigned_label:", error, "Raw value:", d.assigned_label);  
-                }
-            }
-        });
-
-        console.log("Extracted topics:", [...topics]);
-
-        // Store data globally
-        window.ideologyData = data;
-        window.ideologyTopics = [...topics];
-
-        return { ideologyData: data, ideologyTopics: [...topics] };
-    } catch(error) {
-        console.error("Error fetching ideology data:", error);
-        return null;
-    } 
+        const topics = await response.json();
+        window.ideologyTopics = topics;
+        console.log("Fetched topics:", topics);
+        return topics;
+    } catch (error) {
+        console.error("Error fetching topics:", error);
+        return [];
+    }
 }
 
 // Function to load ideology data and initialize chart
@@ -63,14 +31,12 @@ async function loadIdeologyChart() {
         return;
     }
 
-    // Ensure data is loaded
-    await ensureIdeologyDataLoaded();
-
     // Ensure dropdown populated
-    populateTopicDropdown(window.ideologyTopics);
+    const topics = await fetchIdeologyTopics();
+    populateTopicDropdown(topics);
 
     // Add event listener to update chart on selection
-    topicSelect.addEventListener("change", function() {
+    topicSelect.addEventListener("change", async function() {
         let selectedTopic = this.value;
         console.log("Selected topic:", selectedTopic);
 
@@ -80,11 +46,23 @@ async function loadIdeologyChart() {
             return;
         }
 
-        let filteredData = getDataForTopic(window.ideologyData, selectedTopic);
-        if (filteredData.length === 0) {
-            updateIdeologyChart([], "No data found for selected topic.");
-        } else {
-            updateIdeologyChart(filteredData);
+        try {
+            const response = await fetch(`${IDEOLOGY_API}${encodeURIComponent(selectedTopic)}`);
+            if (response.status === 202) {
+                updateIdeologyChart([], false, "Data is being fetched. Please wait...");
+                return;
+            }
+            if (!response.ok) throw new Error("Failed to fetch topic data.");
+
+            const filteredData = await response.json();
+            if (filteredData.length === 0) {
+                updateIdeologyChart([], false, "No data found for selected topic.");
+            } else {
+                updateIdeologyChart(filteredData);
+            }
+        } catch (error) {
+            console.error("Error fetching ideology data:", error);
+            updateIdeologyChart([], false, "Failed to fetch data. Please try again later.");
         }
     });
 
@@ -113,36 +91,9 @@ function populateTopicDropdown(topics) {
     });
 }
 
-// Function to get aggregated data per topic
-function getDataForTopic(data, topic) {
-    if (!topic) return [];
-
-    let counts = data.reduce((acc, d) => {
-        try {
-            let topics;
-
-            if (Array.isArray(d.assigned_label)) {
-                topics = d.assigned_label;
-            } else if (typeof d.assigned_label === 'string') {
-                let fixed_string = d.assigned_label.replace(/'/g, '"');
-                topics = JSON.parse(fixed_string);
-            } else {
-                throw new Error("Invalid assigned_label format");
-            }
-           
-            if (Array.isArray(topics) && topics.includes(topic)) {
-                acc[d.state] = (acc[d.state] || 0) + 1;
-            }
-        } catch (error) {
-            console.error("Error parsing assigned_label:", error, "Raw value:", d.assigned_label);
-        }
-        return acc;
-    }, {});
-    return Object.entries(counts).map(([state, count]) => ({ state, count }));
-}
 
 // Function to update ideology chart
-function updateIdeologyChart(data, isInitialLoad = false) {
+function updateIdeologyChart(data, isInitialLoad = false, message = null) {
     let chartDiv = document.getElementById("ideology-chart");
 
     if (!chartDiv) {
@@ -157,7 +108,7 @@ function updateIdeologyChart(data, isInitialLoad = false) {
     }
 
     if (data.length === 0) {
-        chartDiv.innerHTML = `<p>No data available for selected topic.</p>`;
+        chartDiv.innerHTML = `<p>${message || "No data available for selected topic."}</p>`;
         return;
     }
 
@@ -188,9 +139,7 @@ function updateIdeologyChart(data, isInitialLoad = false) {
     });
 }
 
-async function ensureIdeologyDataLoaded() {
-    if (!window.ideologyData || window.ideologyData.length === 0) {
-        console.warn("Ideology data not loaded. Fetching data...");
-        await fetchIdeologyData();
-    }
-}
+// Call loadIdeologyChart on page load
+document.addEventListener("DOMContentLoaded", () => {
+    loadIdeologyChart();
+});
