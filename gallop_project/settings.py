@@ -31,7 +31,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = ["https://gallop-f748892b3829.herokuapp.com", "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["https://capitol-compass-60aa9bfa6b42.herokuapp.com", "localhost", "127.0.0.1"]
 
 # Redis for Celery
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
@@ -72,7 +72,7 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "https://gallop-f748892b3829.herokuapp.com",
+    "https://capitol-compass-60aa9bfa6b42.herokuapp.com",
     "http://localhost:8000",
 ]
 
@@ -100,12 +100,12 @@ WSGI_APPLICATION = "gallop_project.wsgi.application"
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': os.getenv('REDIS_URL'),
+        'LOCATION': "redis://localhost:6379/1",
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            'CONNECTION_POOL_KWARGS': {
-                'ssl_cert_reqs': None,  # Disable SSL certificate verification
-            },
+            # 'CONNECTION_POOL_KWARGS': {
+            #     'ssl_cert_reqs': None,  # Disable SSL certificate verification
+            # },
         }
     }
 }
@@ -117,13 +117,16 @@ CACHES = {
 DATABASES = {
    "default": {
       "ENGINE": "django.db.backends.mysql",
-        "NAME": os.getenv("DB_NAME"),
-        "USER": os.getenv("DB_USER"),
-        "PASSWORD": os.getenv("DB_PASSWORD"),
-        "HOST": os.getenv("DB_HOST"),
-        "PORT": os.getenv("DB_PORT"),
+        "NAME": os.getenv("AZURE_DB_NAME"),
+        "USER": os.getenv("AZURE_DB_USER"),
+        "PASSWORD": os.getenv("AZURE_DB_PASSWORD"),
+        "HOST": "127.0.0.1",
+        "PORT": 3307,
         "OPTIONS": {
-
+            "ssl": {
+                "ca": str(Path(os.getenv("AZURE_DB_SSL_CA")).resolve()),
+                "verify_cert": False
+            }
         }
     }
 }
