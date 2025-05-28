@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "gallop_project.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "cc_project.settings")
 
 application = get_wsgi_application()

@@ -3,8 +3,8 @@ from celery import Celery
 from django.conf import settings
 
 # Default settings module for Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'gallop_project.settings')
-app = Celery('gallop_project')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'cc_project.settings')
+app = Celery('cc_project')
 
 # Pull from Django settings
 app.conf.broker_url = settings.REDIS_URL

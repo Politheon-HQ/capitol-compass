@@ -1,1 +1,1 @@
-web: gunicorn gallop_project.wsgi --log-file - 
+web: gunicorn cc_project.wsgi --log-file - 

@@ -10,7 +10,7 @@ router.register(r'member_proportions', CongressMembersWithProportionsViewSet)
 router.register(r'combined_data', CombinedDataViewSet)
 
 urlpatterns = [
-    path('', dashboard_view, name='gallop_app'),
+    path('', dashboard_view, name='cc_app'),
     path('api/us_states_topojson/', USStateTopoViewSet.as_view(), name='usstatetopojson-list'),
     path('api/us_districts_topojson/', USDistrictTopoViewSet.as_view(), name='usdistricttopojson-list'),
     path('api/ideology_data_by_topic/<str:topic>/', views.ideology_by_topic, name='ideology_by_topic'),
