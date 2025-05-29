@@ -116,7 +116,7 @@ CACHES = {
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 try:
-    ssl_cert = get_secret("MYSQL_SSL_CA")
+    ssl_cert = get_secret("AZURE-SSL-CA")
     ssl_cert_path = "/tmp/ssl_cert.pem"
     with open(ssl_cert_path, "w") as f:
         f.write(ssl_cert)
