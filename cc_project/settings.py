@@ -34,7 +34,12 @@ SECRET_KEY = get_secret("SECRET-KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = "False"
 
-ALLOWED_HOSTS = ["capitol-compass-gchgeqe7gmbjasfz.centralus-01.azurewebsites.net", "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = [
+    "capitol-compass-gchgeqe7gmbjasfz.centralus-01.azurewebsites.net",
+    "localhost",
+    "127.0.0.1",
+    "169.254.131.3"
+]
 
 # Redis for Celery
 REDIS_URL = get_secret("REDIS-URL")
