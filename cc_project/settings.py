@@ -120,6 +120,7 @@ try:
     ssl_cert_path = "/tmp/ssl_cert.pem"
     with open(ssl_cert_path, "w") as f:
         f.write(ssl_cert)
+    os.chmod("/tmp/ssl_cert.pem", 0o644)
     print(f"✅ SSL cert successfully pulled from Key Vault and saved to {ssl_cert_path}")
 except Exception as e:
     print(f"❌ Failed to pull SSL cert from Key Vault: {e}")
