@@ -8,8 +8,7 @@ if not KEY_VAULT_URL:
     raise Exception("KEY_VAULT_URL is not set")
 
 # Authenticate using Managed Identity, Environment Credentials, or Azure CLI
-client_id = os.getenv("KEYVAULT_CLIENT_ID")
-cred = DefaultAzureCredential(client_id=client_id)
+cred = DefaultAzureCredential()
 
 # Create a SecretClient
 client = SecretClient(vault_url=KEY_VAULT_URL, credential=cred)
