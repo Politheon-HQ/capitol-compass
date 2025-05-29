@@ -13,8 +13,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 import sys
-import django_heroku
-import django_redis
 import environ
 from .azure_keyvault import get_secret
 from dotenv import load_dotenv
@@ -233,5 +231,3 @@ LOGGING = {
     },
 }
 
-# Activate Django-Heroku.
-django_heroku.settings(locals(), staticfiles=False, databases = False)
