@@ -115,14 +115,15 @@ CACHES = {
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+ssl_cert_path = "/tmp/ssl_cert.pem"
 try:
     ssl_cert = get_secret("AZURE-SSL-CA")
-    ssl_cert_path = "/tmp/ssl_cert.pem"
     with open(ssl_cert_path, "w") as f:
         f.write(ssl_cert)
-    os.chmod("/tmp/ssl_cert.pem", 0o644)
+    os.chmod(ssl_cert_path, 0o644)
     print(f"✅ SSL cert successfully pulled from Key Vault and saved to {ssl_cert_path}")
 except Exception as e:
+    ssl_cert_path = None
     print(f"❌ Failed to pull SSL cert from Key Vault: {e}")
 
 DATABASES = {
@@ -134,9 +135,7 @@ DATABASES = {
         "HOST": get_secret("DB-HOST"),
         "PORT": get_secret("DB-PORT"),
         "OPTIONS": {
-            "ssl": {
-                "ca": ssl_cert_path if ssl_cert_path else {},
-            }
+            "ssl": {"ca": ssl_cert_path} if ssl_cert_path and os.path.exists(ssl_cert_path) else {},
         }
     }
 }
