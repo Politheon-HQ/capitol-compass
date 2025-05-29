@@ -7,7 +7,7 @@ python manage.py collectstatic --noinput
 
 # Run migrations
 echo "Running migrations..."
-python manage.py migrate --noinput
+python manage.py migrate --fake-initial--noinput
 
 # If we get here, the import worked, so start Gunicorn
 echo "Starting Gunicorn..."
