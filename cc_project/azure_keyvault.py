@@ -1,5 +1,5 @@
 import os
-from azure.identity import ManagedIdentityCredential, ClientSecretCredential
+from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 
 # Fetch the vault URL from env 
@@ -9,7 +9,7 @@ if not KEY_VAULT_URL:
 
 # Authenticate using Managed Identity, Environment Credentials, or Azure CLI
 client_id = os.getenv("KEYVAULT_CLIENT_ID")
-cred = ManagedIdentityCredential(client_id=client_id)
+cred = DefaultAzureCredential(client_id=client_id)
 
 # Create a SecretClient
 client = SecretClient(vault_url=KEY_VAULT_URL, credential=cred)

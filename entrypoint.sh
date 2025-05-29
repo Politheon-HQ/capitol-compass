@@ -1,19 +1,14 @@
 #!/bin/bash
 set -e
 
-# Print some debug info
-echo "Current directory: $(pwd)"
-echo "Directory contents:"
-ls -la
-echo "Python path:"
-echo $PYTHONPATH
-echo "Django settings module:"
-echo $DJANGO_SETTINGS_MODULE
+# Collect static files
+echo "Collecting static files..."
+python manage.py collectstatic --noinput
 
-# Try to import the WSGI application
-echo "Trying to import WSGI application..."
-python -c "from cc_project.wsgi import application"
+# Run migrations
+echo "Running migrations..."
+python manage.py migrate --noinput
 
 # If we get here, the import worked, so start Gunicorn
 echo "Starting Gunicorn..."
-exec gunicorn cc_project.wsgi:application --bind 0.0.0.0:80 --log-level debug
+exec gunicorn cc_project.wsgi:application --bind 0.0.0.0:8000 --workers 3
