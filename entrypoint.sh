@@ -11,4 +11,4 @@ python manage.py migrate --fake-initial --noinput
 
 # If we get here, the import worked, so start Gunicorn
 echo "Starting Gunicorn..."
-exec gunicorn cc_project.wsgi:application --bind 0.0.0.0:8000 --workers 3
+exec gunicorn cc_project.wsgi:application --bind 0.0.0.0:$PORT --workers 3
