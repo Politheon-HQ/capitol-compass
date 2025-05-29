@@ -38,3 +38,6 @@ ca-cert.b64
 
 # Ignore data files
 gallop_app/static/data/
+
+# Ignore Heroku deploy files
+.github/workflows/deploy.yml

@@ -1,0 +1,47 @@
+name: Build and Deploy to Azure Web App
+
+on:
+    push:
+        branches:
+            - main
+
+env:
+    AZURE_WEBAPP_NAME: capitol-compass
+    AZURE_CONTAINER_REGISTRY: capitolcompass
+    IMAGE_NAME: capitol-compass
+    RESOURCE_GROUP: capitol-compass
+    
+jobs:
+    build_and_deploy:
+        runs-on: ubuntu-latest
+        
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v3
+              with:
+                fetch-depth: 0
+              
+            - name: Log in to Azure CLI
+              uses: azure/login@v1
+              with:
+                creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+            - name: Get latest Git tag
+              id: get_tag
+              run: echo "TAG=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
+              
+            - name: Log in to Azure Container Registry (ACR)
+              run: az acr login --name ${{ env.AZURE_CONTAINER_REGISTRY }}
+
+            - name: Build and push Docker image
+              run: |
+                IMAGE_TAG=${{ steps.get_tag.outputs.TAG }}
+                docker build -t ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ steps.get_tag.outputs.TAG }} .
+                docker push ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ steps.get_tag.outputs.TAG }} 
+              
+            - name: Deploy to Azure Web App
+              uses: azure/webapps-deploy@v2
+              with:
+                app-name: ${{ env.AZURE_WEBAPP_NAME }}
+                slot-name: production
+                images: ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.IMAGE_NAME }}:${{ steps.get_tag.outputs.TAG }}
