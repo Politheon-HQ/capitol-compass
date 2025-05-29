@@ -14,15 +14,15 @@
 
 ## 📂 Project Structure  
 
-- **Main Dashboard Layout:** `gallop_app/templates/dashboard.html`  
-- **Graphs & Plots:** Stored in `gallop_app/static/.js`  
+- **Main Dashboard Layout:** `cc_app/templates/dashboard.html`  
+- **Graphs & Plots:** Stored in `cc_app/static/.js`  
 - **API Data Source:** `/api/{table}`  
 
 ## 🔧 Setup & Deployment  
 
 1. Clone the Repository  
-git clone <https://github.com/Gallop-Startup/gallop-app>  
-cd gallop_app
+git clone <https://github.com/Politheon-HQ/capitol-compass>  
+cd capitol-compass
 
 2. Install Dependencies  
 - pip install -r requirements.txt
@@ -56,10 +56,10 @@ python manage.py runserver
 #### To add new data
 - Add Data to database (Digital Ocean)
 - Setup connection in the following:
--   gallop_app/models.py
--   gallop_app/views.py
--   gallop_app/serializers.py
--   gallop_app/urls.py
+-   cc_app/models.py
+-   cc_app/views.py
+-   cc_app/serializers.py
+-   cc_app/urls.py
 
 
 
