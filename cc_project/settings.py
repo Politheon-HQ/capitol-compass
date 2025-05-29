@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
-import sys
 import environ
 from .azure_keyvault import get_secret
 from dotenv import load_dotenv
@@ -116,6 +115,15 @@ CACHES = {
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+try:
+    ssl_cert = get_secret("MYSQL_SSL_CA")
+    ssl_cert_path = "/tmp/ssl_cert.pem"
+    with open(ssl_cert_path, "w") as f:
+        f.write(ssl_cert)
+    print(f"✅ SSL cert successfully pulled from Key Vault and saved to {ssl_cert_path}")
+except Exception as e:
+    print(f"❌ Failed to pull SSL cert from Key Vault: {e}")
+
 DATABASES = {
    "default": {
       "ENGINE": "django.db.backends.mysql",
@@ -126,11 +134,12 @@ DATABASES = {
         "PORT": get_secret("DB-PORT"),
         "OPTIONS": {
             "ssl": {
-                "ca": get_secret("AZURE-SSL-CA") if os.getenv("USE_SSL") == "1" else {},
+                "ca": ssl_cert_path if ssl_cert_path else {},
             }
         }
     }
 }
+
 
 
 # Password validation
