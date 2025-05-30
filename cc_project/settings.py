@@ -14,15 +14,21 @@ from pathlib import Path
 import os
 import environ
 from .azure_keyvault import get_secret
-from dotenv import load_dotenv
 
-load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-#print("PYTHONPATH:", sys.path)
 BASE_DIR = Path(__file__).resolve().parent.parent
-env = environ.Env()
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
+# Detect if in production or not
+ENVIRONMENT = os.environ.get("DJANGO_ENV", "development")
+
+# Load from .env only if not in production
+if ENVIRONMENT != "production":
+    env = environ.Env()
+    env.read_env(os.path.join(BASE_DIR, '.env'))
+else:
+    env = environ.Env()
+    
 
 
 # Quick-start development settings - unsuitable for production
@@ -34,12 +40,7 @@ SECRET_KEY = get_secret("SECRET-KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = "False"
 
-ALLOWED_HOSTS = [
-    "capitol-compass-gchgeqe7gmbjasfz.centralus-01.azurewebsites.net",
-    "localhost",
-    "127.0.0.1",
-    "169.254.131.3"
-]
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "*").split(",")
 
 # Redis for Celery
 REDIS_URL = get_secret("REDIS-URL")
