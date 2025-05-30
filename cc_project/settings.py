@@ -41,9 +41,15 @@ SECRET_KEY = get_secret("SECRET-KEY")
 DEBUG = "False"
 
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "*").split(",")
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Redis for Celery
-REDIS_URL = get_secret("REDIS-URL")
+REDIS_HOST = os.getenv("AZURE_REDIS_HOST")
+REDIS_PORT = os.getenv("AZURE_REDIS_PORT")
+AZURE_DB = os.getenv("AZURE_REDIS_DATABASE")
+REDIS_PWD = get_secret("REDIS-PWD")
+REDIS_URL = f"redis://:{REDIS_PWD}@{REDIS_HOST}:{REDIS_PORT}/{AZURE_DB}"
 
 # Celery Configuration
 CELERY_BROKER_URL = REDIS_URL
@@ -109,10 +115,10 @@ WSGI_APPLICATION = "cc_project.wsgi.application"
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': get_secret("REDIS-URL"), 
+        'LOCATION': REDIS_URL, 
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-            'SSL': True,
+            'SSL': os.getenv("AZURE_REDIS_SSL", "true").lower() == "true",
         }
     }
 }
