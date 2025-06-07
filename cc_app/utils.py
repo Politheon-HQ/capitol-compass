@@ -5,7 +5,7 @@ from .models import CombinedData
 from collections import defaultdict
 import ast
 
-def get_cached_data(cache_key, fetch_function, timeout=86400):
+def get_cached_data(cache_key, fetch_function, timeout=14400):
     """
     Retrieves cached data if available, otherwise fetches data (from DB or API),
     stores it in Redis cache, and returns it.
@@ -13,7 +13,7 @@ def get_cached_data(cache_key, fetch_function, timeout=86400):
     Args:
         cache_key (str): Unique identifier for the cache.
         fetch_function (callable): Function to fetch data if not in cache.
-        timeout (int): Cache expiration time in seconds (default: 24 hours).
+        timeout (int): Cache expiration time in seconds (default: 4 hours).
 
     Returns:
         JsonResponse: JSON response with the cached or fetched data.
@@ -27,7 +27,7 @@ def get_cached_data(cache_key, fetch_function, timeout=86400):
     # If not cached, fetch from the API
     data = fetch_function()
     if data:
-        cache.set(cache_key, data, timeout=timeout)  # Cache for 24 hours
+        cache.set(cache_key, data, timeout=timeout)  # Cache for 4 hours
         print(f"Cache miss for key: {cache_key} - data fetched and cached ({len(data) if isinstance(data, list) else 'unknown'} items)")
         return data
     else:
@@ -64,7 +64,7 @@ def get_ideology_data_for_topic(topic):
             continue
 
     result = [{"state": state, "count": count} for state, count in counts.items()]
-    cache.set(cache_key, result, timeout=86400)  # Cache for 24 hours
+    cache.set(cache_key, result, timeout=14400)  # Cache for 4 hours
     return result
 
 TOPIC_LIST_CACHE_KEY = "ideology_topics"
@@ -100,5 +100,5 @@ def get_ideology_topics():
     print(f"\n Final Topic List ({len(result)}): {result}\n")
 
     if result:
-        cache.set(TOPIC_LIST_CACHE_KEY, result, timeout=86400)  # Cache for 24 hours
+        cache.set(TOPIC_LIST_CACHE_KEY, result, timeout=14400)  # Cache for 4 hours
     return result
